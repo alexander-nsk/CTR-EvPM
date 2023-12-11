@@ -1,35 +1,71 @@
 package com.allmagen.testtask.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table
-public class ActionEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class ActionEntity implements Serializable {
+    @EmbeddedId
+    private UidTag uidTag;
+    private int count;
 
-    private String uid;
-
-    private String tag;
-
-    public String getTag() {
-        return tag;
+    public ActionEntity() {
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public ActionEntity(UidTag uidTag, int count) {
+        this.uidTag = uidTag;
+        this.count = count;
     }
 
-    public void setTag(String tag) {
-        this.tag = tag;
+    public UidTag getUidTag() {
+        return uidTag;
     }
 
-    @Override
-    public String toString() {
-        return "ActionEntity{" +
-                "uid='" + uid + '\'' +
-                ", tag='" + tag + '\'' +
-                '}';
+    public int getCount() {
+        return count;
+    }
+
+    @Embeddable
+    public static class UidTag implements Serializable {
+        private String tag;
+
+        @ManyToOne
+        @JoinColumn(name = "uid", nullable = false)
+        private ViewEntity viewEntity;
+
+        public UidTag() {
+        }
+
+        public UidTag(String tag, ViewEntity viewEntity) {
+            this.tag = tag;
+            this.viewEntity = viewEntity;
+        }
+
+        public String getTag() {
+            return tag;
+        }
+
+        public ViewEntity getViewEntity() {
+            return viewEntity;
+        }
+
+        public void setViewEntity(ViewEntity viewEntity) {
+            this.viewEntity = viewEntity;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            UidTag uidTag = (UidTag) o;
+            return Objects.equals(tag, uidTag.tag) && Objects.equals(viewEntity, uidTag.viewEntity);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(tag, viewEntity);
+        }
     }
 }

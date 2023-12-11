@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,11 +14,8 @@ import java.time.LocalDateTime;
         @Index(name = "mmDmaX", columnList = "mmDma"),
         @Index(name = "siteIdX", columnList = "siteId")
 })
-public class ViewEntity {
+public class ViewEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
     @Column(unique = true)
     private String uid;
 
@@ -31,14 +29,18 @@ public class ViewEntity {
     private String hardware;
     private String siteId;
 
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     public LocalDateTime getRegTime() {
         return regTime;
-    }
-
-    public String getUid() {
-        return uid;
     }
 
     public int getFcImpChk() {
@@ -71,10 +73,6 @@ public class ViewEntity {
 
     public String getSiteId() {
         return siteId;
-    }
-
-    public void setUid(String uid) {
-        this.uid = uid;
     }
 
     public void setRegTime(LocalDateTime regTime) {
@@ -116,7 +114,7 @@ public class ViewEntity {
     @Override
     public String toString() {
         return "ViewEntity{" +
-                "uid=" + uid +
+                "id=" + uid +
                 ", regTime=" + regTime +
                 ", fcImpChk=" + fcImpChk +
                 ", fcTimeChk=" + fcTimeChk +

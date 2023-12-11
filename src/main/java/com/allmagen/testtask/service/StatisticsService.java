@@ -15,10 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @EnableAsync
@@ -76,7 +77,7 @@ public class StatisticsService {
             // skip csv header
             csvReader.readNext();
 
-            List<ActionEntity> actionEntities = new ArrayList<>();
+            Map<ActionEntity.UidTag, Integer> uidTagMap = new HashMap<>();
 
             while (true) {
                 String[] csvLine = csvReader.readNext();
@@ -88,12 +89,26 @@ public class StatisticsService {
                     throw new RuntimeException("Action csvLine should has length 2");
                 }
 
-                ActionEntity actionEntity = new ActionEntity();
-                actionEntity.setUid(csvLine[0]);
-                actionEntity.setTag(csvLine[1]);
+                String uid = csvLine[0].trim();
+                Optional<ViewEntity> optionalViewEntity = viewRepository.findById(uid);
+                if (optionalViewEntity.isEmpty()) {
+                    System.out.println(uid + " not exist");
+                    continue;
+                }
 
-                actionEntities.add(actionEntity);
+                ViewEntity viewEntity = optionalViewEntity.get();
+
+                ActionEntity.UidTag uidTag = new ActionEntity.UidTag(csvLine[1], viewEntity);
+                if (uidTagMap.containsKey(uidTag)) {
+                    uidTagMap.put(uidTag, uidTagMap.get(uidTag) + 1);
+                } else {
+                    uidTagMap.put(uidTag, 1);
+                }
             }
+
+            List<ActionEntity> actionEntities = uidTagMap.entrySet().stream()
+                    .map(entry -> new ActionEntity(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList());
 
             actionRepository.saveAll(actionEntities);
 
@@ -108,5 +123,9 @@ public class StatisticsService {
 
     public Iterable<ActionEntity> getActions() {
         return actionRepository.findAll();
+    }
+
+    public List<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate) {
+        return viewRepository.getNumMmaByDates(startDate, endDate);
     }
 }

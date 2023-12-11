@@ -4,14 +4,19 @@ import com.allmagen.testtask.model.ActionEntity;
 import com.allmagen.testtask.model.ViewEntity;
 import com.allmagen.testtask.service.StatisticsService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Controller
 @RequestMapping("/")
@@ -43,8 +48,10 @@ public class StatisticsController {
 
     @Operation(summary = "get views from DB(for tests)")
     @RequestMapping(
-            path = "getviews",
-            method = RequestMethod.GET)
+            path = "viewscount",
+            method = RequestMethod.GET,
+            produces = {"application/json"})
+
     public ResponseEntity<Iterable<ViewEntity>> getViews() {
         return ResponseEntity.ok(statisticsService.getViews());
     }
@@ -52,8 +59,25 @@ public class StatisticsController {
     @Operation(summary = "get actions from DB(for tests)")
     @RequestMapping(
             path = "getactions",
-            method = RequestMethod.GET)
+            method = RequestMethod.GET,
+            produces = {"application/json"})
     public ResponseEntity<Iterable<ActionEntity>> getActions() {
         return ResponseEntity.ok(statisticsService.getActions());
+    }
+
+    @Operation(summary = "Calculate number of views for given dates")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Views number calculated")})
+    @GetMapping(value = "/views_number", produces = {"application/json"})
+    public ResponseEntity<List<Integer>> getNumMmaByDates(
+            @Parameter(description = "Date from", required = true)
+            @RequestParam(value = "dateFrom")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateFrom,
+            @Parameter(description = "Date to", required = true)
+            @RequestParam(value = "dateTo")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateTo) {
+
+        List<Integer> sales = statisticsService.getNumMmaByDates(dateFrom, dateTo);
+
+        return ResponseEntity.ok(sales);
     }
 }
