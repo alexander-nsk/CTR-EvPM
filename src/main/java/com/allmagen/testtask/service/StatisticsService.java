@@ -4,10 +4,12 @@ import com.allmagen.testtask.dao.ActionRepository;
 import com.allmagen.testtask.dao.ViewRepository;
 import com.allmagen.testtask.model.ActionEntity;
 import com.allmagen.testtask.model.ViewEntity;
+import com.allmagen.testtask.model.dto.MmDmaCTR;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 import com.opencsv.exceptions.CsvValidationException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -132,5 +134,9 @@ public class StatisticsService {
 
     public List<Integer> getNumSiteIdByDates(LocalDate startDate, LocalDate endDate, String siteId) {
         return viewRepository.getNumSiteIdByDates(startDate, endDate, siteId);
+    }
+
+    public List<MmDmaCTR>  getMmDmaCTR() {
+        return viewRepository.getMmDmaCTR();
     }
 }
