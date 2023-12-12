@@ -3,12 +3,12 @@ package com.allmagen.testtask;
 import com.allmagen.testtask.model.ActionEntity;
 import com.allmagen.testtask.model.ViewEntity;
 import com.allmagen.testtask.model.dto.MmDmaCTR;
+import com.allmagen.testtask.model.dto.SiteIdCTR;
 import com.allmagen.testtask.service.StatisticsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -114,9 +114,16 @@ public class StatisticsController {
     @Operation(summary = "CTR for MmDma")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of pairs of mmDma and CTR")})
     @GetMapping(value = "/mmdma_ctr", produces = {"application/json"})
-    public ResponseEntity<List<MmDmaCTR> > getMmDmaCTR() {
-        List<MmDmaCTR>  pairList = statisticsService.getMmDmaCTR();
+    public ResponseEntity<List<MmDmaCTR>> getMmDmaCTR() {
+        List<MmDmaCTR> pairList = statisticsService.getMmDmaCTR();
+        return ResponseEntity.ok(pairList);
+    }
 
+    @Operation(summary = "CTR for site id")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of pairs of site id and CTR")})
+    @GetMapping(value = "/site_id_ctr", produces = {"application/json"})
+    public ResponseEntity<List<SiteIdCTR>> getSiteIdCTR() {
+        List<SiteIdCTR> pairList = statisticsService.getSiteIdCTR();
         return ResponseEntity.ok(pairList);
     }
 

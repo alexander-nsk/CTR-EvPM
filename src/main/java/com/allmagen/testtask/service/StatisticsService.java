@@ -5,11 +5,11 @@ import com.allmagen.testtask.dao.ViewRepository;
 import com.allmagen.testtask.model.ActionEntity;
 import com.allmagen.testtask.model.ViewEntity;
 import com.allmagen.testtask.model.dto.MmDmaCTR;
+import com.allmagen.testtask.model.dto.SiteIdCTR;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 import com.opencsv.exceptions.CsvValidationException;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -75,6 +75,7 @@ public class StatisticsService {
         }
     }
 
+    @Transactional
     public void addActionFromFile(MultipartFile file) {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream())); CSVReader csvReader = new CSVReaderBuilder(fileReader).build()) {
             // skip csv header
@@ -93,6 +94,7 @@ public class StatisticsService {
                 }
 
                 String uid = csvLine[0].trim();
+                //TODO:
                 Optional<ViewEntity> optionalViewEntity = viewRepository.findById(uid);
                 if (optionalViewEntity.isEmpty()) {
                     System.out.println(uid + " not exist");
@@ -136,7 +138,11 @@ public class StatisticsService {
         return viewRepository.getNumSiteIdByDates(startDate, endDate, siteId);
     }
 
-    public List<MmDmaCTR>  getMmDmaCTR() {
+    public List<MmDmaCTR> getMmDmaCTR() {
         return viewRepository.getMmDmaCTR();
+    }
+
+    public List<SiteIdCTR> getSiteIdCTR() {
+        return viewRepository.getSiteIdCTR();
     }
 }
