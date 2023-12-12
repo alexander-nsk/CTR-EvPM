@@ -7,9 +7,11 @@ import com.allmagen.testtask.model.ViewEntity;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
+import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -30,7 +32,8 @@ public class StatisticsService {
     @Autowired
     private ActionRepository actionRepository;
 
-    public void addViewFromFile(MultipartFile file) {
+    @Transactional
+    public Iterable<ViewEntity> addViewFromFile(MultipartFile file) throws CsvValidationException, IOException {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream())); CSVReader csvReader = new CSVReaderBuilder(fileReader).build()) {
             // skip csv header
             csvReader.readNext();
@@ -65,10 +68,8 @@ public class StatisticsService {
                 viewEntityList.add(viewEntity);
             }
 
-            viewRepository.saveAll(viewEntityList);
+            return viewRepository.saveAll(viewEntityList);
 
-        } catch (IOException | CsvException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -125,7 +126,11 @@ public class StatisticsService {
         return actionRepository.findAll();
     }
 
-    public List<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate) {
-        return viewRepository.getNumMmaByDates(startDate, endDate);
+    public List<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate, int mmDma) {
+        return viewRepository.getNumMmaByDates(startDate, endDate, mmDma);
+    }
+
+    public List<Integer> getNumSiteIdByDates(LocalDate startDate, LocalDate endDate, String siteId) {
+        return viewRepository.getNumSiteIdByDates(startDate, endDate, siteId);
     }
 }

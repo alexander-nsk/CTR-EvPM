@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,15 +25,24 @@ public class StatisticsController {
     @Autowired
     private StatisticsService statisticsService;
 
-    @Operation(summary = "add view data from CSV")
+    @Operation(summary = "Add view data from CSV")
     @RequestMapping(
             path = "view",
             method = RequestMethod.POST,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "application/json")
-    public ResponseEntity<String> addViewData(@RequestPart(value = "file") MultipartFile multipartFile) {
-        statisticsService.addViewFromFile(multipartFile);
-        return ResponseEntity.ok("Muito obregado");
+    public ResponseEntity<Response<Iterable<ViewEntity>>> addViewData(@RequestPart(value = "file") MultipartFile multipartFile) {
+        try {
+            Iterable<ViewEntity> viewEntities = statisticsService.addViewFromFile(multipartFile);
+            Response<Iterable<ViewEntity>> response = new Response<>(true);
+            response.setData(viewEntities);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.out.println("Error adding view data from CSV");
+            Response<Iterable<ViewEntity>> response = new Response<>(false);
+            response.setErrorMessage("Error adding view data from CSV: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @Operation(summary = "add action data from CSV")
@@ -43,7 +53,7 @@ public class StatisticsController {
             produces = "application/json")
     public ResponseEntity<String> addActionData(@RequestPart(value = "file") MultipartFile multipartFile) {
         statisticsService.addActionFromFile(multipartFile);
-        return ResponseEntity.ok("Muito obregado");
+        return ResponseEntity.ok("ок");
     }
 
     @Operation(summary = "get views from DB(for tests)")
@@ -65,19 +75,70 @@ public class StatisticsController {
         return ResponseEntity.ok(statisticsService.getActions());
     }
 
-    @Operation(summary = "Calculate number of views for given dates")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Views number calculated")})
-    @GetMapping(value = "/views_number", produces = {"application/json"})
+    @Operation(summary = "Calculate number of views for given mmDma and dates")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "mmDma number calculated")})
+    @GetMapping(value = "/mmDma_num", produces = {"application/json"})
     public ResponseEntity<List<Integer>> getNumMmaByDates(
             @Parameter(description = "Date from", required = true)
             @RequestParam(value = "dateFrom")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateFrom,
             @Parameter(description = "Date to", required = true)
             @RequestParam(value = "dateTo")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateTo) {
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateTo,
+            @Parameter(description = "mmDma", required = true) @RequestParam(value = "mmDma") int mmDma) {
 
-        List<Integer> sales = statisticsService.getNumMmaByDates(dateFrom, dateTo);
+        List<Integer> mmDmaNums = statisticsService.getNumMmaByDates(dateFrom, dateTo, mmDma);
 
-        return ResponseEntity.ok(sales);
+        return ResponseEntity.ok(mmDmaNums);
+    }
+
+    @Operation(summary = "Calculate number of views for given sideId and dates")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "SiteId number calculated")})
+    @GetMapping(value = "/site_id_num", produces = {"application/json"})
+    public ResponseEntity<List<Integer>> getSiteIdNumsByDates(
+            @Parameter(description = "Date from", required = true)
+            @RequestParam(value = "dateFrom")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateFrom,
+            @Parameter(description = "Date to", required = true)
+            @RequestParam(value = "dateTo")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateTo,
+            @Parameter(description = "siteId", required = true) @RequestParam(value = "siteId") String siteId) {
+
+        List<Integer> siteIdNums = statisticsService.getNumSiteIdByDates(dateFrom, dateTo, siteId);
+
+        return ResponseEntity.ok(siteIdNums);
+    }
+
+    private class Response<T> {
+        private final boolean success;
+        private T data;
+        private String errorMessage;
+
+        public Response(boolean success) {
+            this.success = success;
+        }
+
+        public T getData() {
+            return data;
+        }
+
+        public void setData(T data) {
+            this.data = data;
+        }
+
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+
+        public void setErrorMessage(String errorMessage) {
+            this.errorMessage = errorMessage;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
     }
 }
+
+
+
