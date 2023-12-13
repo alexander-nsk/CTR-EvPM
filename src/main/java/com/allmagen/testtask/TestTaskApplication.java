@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @OpenAPIDefinition(
-        info = @Info(title = "Test Task", version = "0.0.1", description = "Test API Documentation.")
+        info = @Info(title = "Allmagen", version = "0.0.1", description = "Test API Documentation.")
 )
 @SpringBootApplication
 public class TestTaskApplication {

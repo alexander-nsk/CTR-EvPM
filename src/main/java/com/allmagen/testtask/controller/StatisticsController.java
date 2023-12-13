@@ -35,17 +35,17 @@ public class StatisticsController {
             method = RequestMethod.POST,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "application/json")
-    public ResponseEntity<Response<Iterable<ViewEntity>>> addViewData(@RequestPart(value = "file") MultipartFile multipartFile) {
+    public ResponseEntity<OperationResponse<Iterable<ViewEntity>>> uploadViewsFromFile(@RequestPart(value = "file") MultipartFile multipartFile) {
         try {
-            Iterable<ViewEntity> viewEntities = statisticsService.addViewFromFile(multipartFile);
-            Response<Iterable<ViewEntity>> response = new Response<>(true);
-            response.setData(viewEntities);
-            return ResponseEntity.ok(response);
+            Iterable<ViewEntity> viewEntities = statisticsService.uploadViewsFromFile(multipartFile);
+            OperationResponse<Iterable<ViewEntity>> operationResponse = new OperationResponse<>(true);
+            operationResponse.setData(viewEntities);
+            return ResponseEntity.ok(operationResponse);
         } catch (Exception e) {
             System.out.println("Error adding view data from CSV");
-            Response<Iterable<ViewEntity>> response = new Response<>(false);
-            response.setErrorMessage("Error adding view data from CSV: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            OperationResponse<Iterable<ViewEntity>> operationResponse = new OperationResponse<>(false);
+            operationResponse.setErrorMessage("Error adding view data from CSV: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(operationResponse);
         }
     }
 
@@ -55,33 +55,14 @@ public class StatisticsController {
             method = RequestMethod.POST,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "application/json")
-    public ResponseEntity<String> addActionData(@RequestPart(value = "file") MultipartFile multipartFile) {
-        statisticsService.addActionFromFile(multipartFile);
+    public ResponseEntity<String> uploadActionsFromFile(@RequestPart(value = "file") MultipartFile multipartFile) {
+        statisticsService.uploadActionsFromFile(multipartFile);
         return ResponseEntity.ok("ок");
-    }
-
-    @Operation(summary = "get views from DB(for tests)")
-    @RequestMapping(
-            path = "views",
-            method = RequestMethod.GET,
-            produces = {"application/json"})
-
-    public ResponseEntity<Iterable<ViewEntity>> getViews() {
-        return ResponseEntity.ok(statisticsService.getViews());
-    }
-
-    @Operation(summary = "get actions from DB(for tests)")
-    @RequestMapping(
-            path = "actions",
-            method = RequestMethod.GET,
-            produces = {"application/json"})
-    public ResponseEntity<Iterable<ActionEntity>> getActions() {
-        return ResponseEntity.ok(statisticsService.getActions());
     }
 
     @Operation(summary = "Calculate number of views for given mmDma and dates")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "mmDma number calculated")})
-    @GetMapping(value = "/views/mmDma", produces = {"application/json"})
+    @GetMapping(value = "/views/allByMmDma", produces = {"application/json"})
     public ResponseEntity<List<Integer>> getNumMmaByDates(
             @Parameter(description = "Date from", required = true)
             @RequestParam(value = "dateFrom")
@@ -98,7 +79,7 @@ public class StatisticsController {
 
     @Operation(summary = "Calculate number of views for given sideId and dates")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "SiteId number calculated")})
-    @GetMapping(value = "/views/site_id", produces = {"application/json"})
+    @GetMapping(value = "/views/allBySiteId", produces = {"application/json"})
     public ResponseEntity<List<Integer>> getSiteIdNumsByDates(
             @Parameter(description = "Date from", required = true)
             @RequestParam(value = "dateFrom")
@@ -115,26 +96,26 @@ public class StatisticsController {
 
     @Operation(summary = "CTR for MmDma")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of pairs of mmDma and CTR")})
-    @GetMapping(value = "/views/mmdma_ctr", produces = {"application/json"})
-    public ResponseEntity<List<MmDmaCTR>> getMmDmaCTR() {
-        List<MmDmaCTR> pairList = statisticsService.getMmDmaCTR();
+    @GetMapping(value = "/views/ctrByMmDma", produces = {"application/json"})
+    public ResponseEntity<List<MmDmaCTR>> getMmDmaCTR(@Parameter(description = "tag") @RequestParam(required = false) String tag) {
+        List<MmDmaCTR> pairList = statisticsService.getMmDmaCTR(tag);
         return ResponseEntity.ok(pairList);
     }
 
     @Operation(summary = "CTR for site id")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of pairs of site id and CTR")})
-    @GetMapping(value = "/views/site_id_ctr", produces = {"application/json"})
-    public ResponseEntity<List<SiteIdCTR>> getSiteIdCTR() {
-        List<SiteIdCTR> pairList = statisticsService.getSiteIdCTR();
+    @GetMapping(value = "/views/ctrBySiteId", produces = {"application/json"})
+    public ResponseEntity<List<SiteIdCTR>> getSiteIdCTR(@Parameter(description = "tag") @RequestParam(required = false) String tag) {
+        List<SiteIdCTR> pairList = statisticsService.getSiteIdCTR(tag);
         return ResponseEntity.ok(pairList);
     }
 
-    private class Response<T> {
+    private class OperationResponse<T> {
         private final boolean success;
         private T data;
         private String errorMessage;
 
-        public Response(boolean success) {
+        public OperationResponse(boolean success) {
             this.success = success;
         }
 
@@ -159,6 +140,3 @@ public class StatisticsController {
         }
     }
 }
-
-
-

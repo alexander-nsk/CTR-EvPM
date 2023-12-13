@@ -10,6 +10,9 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 import com.opencsv.exceptions.CsvValidationException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +28,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class StatisticsService {
+    private static final Logger LOGGER = LogManager.getLogger(StatisticsService.class);
+
     private final ViewRepository viewRepository;
     private final ActionRepository actionRepository;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -35,7 +40,9 @@ public class StatisticsService {
     }
 
     @Transactional
-    public Iterable<ViewEntity> addViewFromFile(MultipartFile file) throws CsvValidationException, IOException {
+    public Iterable<ViewEntity> uploadViewsFromFile(MultipartFile file) throws CsvValidationException, IOException {
+        LOGGER.log(Level.INFO, "Upload views from file " + file.getOriginalFilename() + " started");
+
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream())); CSVReader csvReader = new CSVReaderBuilder(fileReader).build()) {
             // skip csv header
             csvReader.readNext();
@@ -44,20 +51,20 @@ public class StatisticsService {
 
             while (csvReader.iterator().hasNext()) {
                 String[] csvLine = csvReader.readNext();
-                if (csvLine == null) {
-                    break;
-                }
 
                 if (csvLine.length != 10) {
-                    throw new RuntimeException("View csvLine should has length 10");
+                    String error = "View csvLine should has length 10";
+                    LOGGER.log(Level.ERROR, error);
+                    throw new RuntimeException(error);
                 }
 
                 ViewEntity viewEntity = parseViewEntity(csvLine);
                 viewEntityList.add(viewEntity);
             }
 
-            return viewRepository.saveAll(viewEntityList);
+            LOGGER.log(Level.INFO, "Upload views from file " + file.getOriginalFilename() + " finished");
 
+            return viewRepository.saveAll(viewEntityList);
         }
     }
 
@@ -77,7 +84,9 @@ public class StatisticsService {
     }
 
     @Transactional
-    public void addActionFromFile(MultipartFile file) {
+    public void uploadActionsFromFile(MultipartFile file) {
+        LOGGER.log(Level.INFO, "Upload actions from file " + file.getOriginalFilename() + " started");
+
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream())); CSVReader csvReader = new CSVReaderBuilder(fileReader).build()) {
             // skip csv header
             csvReader.readNext();
@@ -91,14 +100,16 @@ public class StatisticsService {
                 }
 
                 if (csvLine.length != 2) {
-                    throw new RuntimeException("Action csvLine should has length 2");
+                    String error = "Action csvLine should has length 2";
+                    LOGGER.log(Level.ERROR, error);
+                    throw new RuntimeException(error);
                 }
 
                 String uid = csvLine[0].trim();
                 //TODO:
                 Optional<ViewEntity> optionalViewEntity = viewRepository.findById(uid);
                 if (optionalViewEntity.isEmpty()) {
-                    System.out.println(uid + " not exist");
+                    LOGGER.log(Level.INFO, uid + " not exist");
                     continue;
                 }
 
@@ -117,17 +128,20 @@ public class StatisticsService {
                     .collect(Collectors.toList());
 
             actionRepository.saveAll(actionEntities);
+            LOGGER.log(Level.INFO, "Upload actions from file " + file.getOriginalFilename() + " finished");
 
         } catch (IOException | CsvException e) {
+            LOGGER.log(Level.ERROR, "Upload actions from file " + file.getOriginalFilename() + " failed");
+            LOGGER.log(Level.ERROR, e);
             throw new RuntimeException(e);
         }
     }
 
-    public Iterable<ViewEntity> getViews() {
+    public Iterable<ViewEntity> getAllViews() {
         return viewRepository.findAll();
     }
 
-    public Iterable<ActionEntity> getActions() {
+    public Iterable<ActionEntity> getAllActions() {
         return actionRepository.findAll();
     }
 
@@ -139,11 +153,15 @@ public class StatisticsService {
         return viewRepository.getNumSiteIdByDates(startDate, endDate, siteId);
     }
 
-    public List<MmDmaCTR> getMmDmaCTR() {
-        return viewRepository.getMmDmaCTR();
+    public List<MmDmaCTR> getMmDmaCTR(String tag) {
+        return Optional.ofNullable(tag)
+                .map(viewRepository::getMmDmaCTR)
+                .orElseGet(viewRepository::getMmDmaCTR);
     }
 
-    public List<SiteIdCTR> getSiteIdCTR() {
-        return viewRepository.getSiteIdCTR();
+    public List<SiteIdCTR> getSiteIdCTR(String tag) {
+        return Optional.ofNullable(tag)
+                .map(viewRepository::getSiteIdCTR)
+                .orElseGet(viewRepository::getSiteIdCTR);
     }
 }
