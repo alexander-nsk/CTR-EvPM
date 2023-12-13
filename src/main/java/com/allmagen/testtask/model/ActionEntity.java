@@ -6,7 +6,7 @@ import java.util.Objects;
 
 @Entity
 @Table
-public class ActionEntity implements Serializable {
+public class ActionEntity {
     @EmbeddedId
     private UidTag uidTag;
     private int count;
@@ -67,5 +67,18 @@ public class ActionEntity implements Serializable {
         public int hashCode() {
             return Objects.hash(tag, viewEntity);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ActionEntity that = (ActionEntity) o;
+        return count == that.count && Objects.equals(uidTag, that.uidTag);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uidTag, count);
     }
 }

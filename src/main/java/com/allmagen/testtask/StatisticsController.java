@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,8 +23,11 @@ import java.util.List;
 @Controller
 @RequestMapping("/")
 public class StatisticsController {
-    @Autowired
-    private StatisticsService statisticsService;
+    private final StatisticsService statisticsService;
+
+    public StatisticsController(StatisticsService statisticsService) {
+        this.statisticsService = statisticsService;
+    }
 
     @Operation(summary = "Add view data from CSV")
     @RequestMapping(

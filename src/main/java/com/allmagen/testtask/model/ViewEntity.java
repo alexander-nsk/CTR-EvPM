@@ -6,15 +6,15 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(indexes = {
         @Index(name = "mmDmaX", columnList = "mmDma"),
         @Index(name = "siteIdX", columnList = "siteId")
 })
-public class ViewEntity implements Serializable {
+public class ViewEntity {
     @Id
     @Column(unique = true)
     private String uid;
@@ -125,5 +125,18 @@ public class ViewEntity implements Serializable {
                 ", hardware='" + hardware + '\'' +
                 ", siteId='" + siteId + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ViewEntity that = (ViewEntity) o;
+        return fcImpChk == that.fcImpChk && fcTimeChk == that.fcTimeChk && utmtr == that.utmtr && mmDma == that.mmDma && Objects.equals(uid, that.uid) && Objects.equals(regTime, that.regTime) && Objects.equals(osName, that.osName) && Objects.equals(model, that.model) && Objects.equals(hardware, that.hardware) && Objects.equals(siteId, that.siteId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uid, regTime, fcImpChk, fcTimeChk, utmtr, mmDma, osName, model, hardware, siteId);
     }
 }

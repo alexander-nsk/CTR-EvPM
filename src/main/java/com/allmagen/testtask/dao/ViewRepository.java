@@ -3,7 +3,6 @@ package com.allmagen.testtask.dao;
 import com.allmagen.testtask.model.ViewEntity;
 import com.allmagen.testtask.model.dto.MmDmaCTR;
 import com.allmagen.testtask.model.dto.SiteIdCTR;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

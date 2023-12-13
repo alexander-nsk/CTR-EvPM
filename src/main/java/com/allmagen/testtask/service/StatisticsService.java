@@ -10,8 +10,6 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 import com.opencsv.exceptions.CsvValidationException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,13 +24,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@EnableAsync
 public class StatisticsService {
-    @Autowired
-    private ViewRepository viewRepository;
+    private final ViewRepository viewRepository;
+    private final ActionRepository actionRepository;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    @Autowired
-    private ActionRepository actionRepository;
+    public StatisticsService(ViewRepository viewRepository, ActionRepository actionRepository) {
+        this.viewRepository = viewRepository;
+        this.actionRepository = actionRepository;
+    }
 
     @Transactional
     public Iterable<ViewEntity> addViewFromFile(MultipartFile file) throws CsvValidationException, IOException {
@@ -42,7 +42,7 @@ public class StatisticsService {
 
             List<ViewEntity> viewEntityList = new ArrayList<>();
 
-            while (true) {
+            while (csvReader.iterator().hasNext()) {
                 String[] csvLine = csvReader.readNext();
                 if (csvLine == null) {
                     break;
@@ -52,27 +52,28 @@ public class StatisticsService {
                     throw new RuntimeException("View csvLine should has length 10");
                 }
 
-                ViewEntity viewEntity = new ViewEntity();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                LocalDateTime localDateTime = LocalDateTime.parse(csvLine[0], formatter);
-
-                viewEntity.setUid(csvLine[1]);
-                viewEntity.setRegTime(localDateTime);
-                viewEntity.setFcImpChk(Integer.parseInt(csvLine[2]));
-                viewEntity.setFcTimeChk(Integer.parseInt(csvLine[3]));
-                viewEntity.setUtmtr(Integer.parseInt(csvLine[4]));
-                viewEntity.setMmDma(Integer.parseInt(csvLine[5]));
-                viewEntity.setOsName(csvLine[6]);
-                viewEntity.setModel(csvLine[7]);
-                viewEntity.setHardware(csvLine[8]);
-                viewEntity.setSiteId(csvLine[9]);
-
+                ViewEntity viewEntity = parseViewEntity(csvLine);
                 viewEntityList.add(viewEntity);
             }
 
             return viewRepository.saveAll(viewEntityList);
 
         }
+    }
+
+    private ViewEntity parseViewEntity(String[] csvLine) {
+        ViewEntity viewEntity = new ViewEntity();
+        viewEntity.setRegTime(LocalDateTime.parse(csvLine[0], formatter));
+        viewEntity.setUid(csvLine[1]);
+        viewEntity.setFcImpChk(Integer.parseInt(csvLine[2]));
+        viewEntity.setFcTimeChk(Integer.parseInt(csvLine[3]));
+        viewEntity.setUtmtr(Integer.parseInt(csvLine[4]));
+        viewEntity.setMmDma(Integer.parseInt(csvLine[5]));
+        viewEntity.setOsName(csvLine[6]);
+        viewEntity.setModel(csvLine[7]);
+        viewEntity.setHardware(csvLine[8]);
+        viewEntity.setSiteId(csvLine[9]);
+        return viewEntity;
     }
 
     @Transactional
