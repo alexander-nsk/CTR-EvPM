@@ -26,7 +26,7 @@ public interface ViewRepository extends CrudRepository<ViewEntity, String> {
     @Query("SELECT ve.mmDma AS mmDma, " +
             "SUM(COALESCE(ae.count, 0)) * 1.0 / COUNT(DISTINCT ve.uid) AS ctr " +
             "FROM ViewEntity ve " +
-            "FULL JOIN ActionEntity ae ON (ve.uid = ae.uidTag.viewEntity AND (ae.uidTag.tag = 'fclick' OR NOT (ae.uidTag.tag LIKE 'v%'))) " +
+            "FULL JOIN ActionEntity ae ON (ve.uid = ae.uidTag.viewEntity.uid AND (ae.uidTag.tag = 'fclick' OR NOT (ae.uidTag.tag LIKE 'v%'))) " +
             "WHERE ve.mmDma IS NOT NULL " +
             "GROUP BY ve.mmDma")
     List<MmDmaCTR> getMmDmaCTR();
@@ -34,7 +34,7 @@ public interface ViewRepository extends CrudRepository<ViewEntity, String> {
     @Query("SELECT ve.siteId AS siteId, " +
             "SUM(COALESCE(ae.count, 0)) * 1.0 / COUNT(DISTINCT ve.uid) AS ctr " +
             "FROM ViewEntity ve " +
-            "FULL JOIN ActionEntity ae ON (ve.uid = ae.uidTag.viewEntity AND (ae.uidTag.tag = 'fclick' OR NOT (ae.uidTag.tag LIKE 'v%'))) " +
+            "FULL JOIN ActionEntity ae ON (ve.uid = ae.uidTag.viewEntity.uid AND (ae.uidTag.tag = 'fclick' OR NOT (ae.uidTag.tag LIKE 'v%'))) " +
             "WHERE ve.siteId IS NOT NULL " +
             "GROUP BY ve.siteId")
     List<SiteIdCTR> getSiteIdCTR();

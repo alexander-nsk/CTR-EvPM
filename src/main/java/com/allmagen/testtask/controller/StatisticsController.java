@@ -1,4 +1,4 @@
-package com.allmagen.testtask;
+package com.allmagen.testtask.controller;
 
 import com.allmagen.testtask.model.ActionEntity;
 import com.allmagen.testtask.model.ViewEntity;

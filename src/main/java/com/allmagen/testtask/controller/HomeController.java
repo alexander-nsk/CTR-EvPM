@@ -1,4 +1,4 @@
-package com.allmagen.testtask;
+package com.allmagen.testtask.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class HomeController {
     @RequestMapping("/")
     public String index() {
-        return "redirect:api-docs/";
+        return "redirect:swagger-ui.html";
     }
 }
