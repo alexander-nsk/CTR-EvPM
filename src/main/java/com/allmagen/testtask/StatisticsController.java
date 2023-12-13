@@ -31,7 +31,7 @@ public class StatisticsController {
 
     @Operation(summary = "Add view data from CSV")
     @RequestMapping(
-            path = "view",
+            path = "views",
             method = RequestMethod.POST,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "application/json")
@@ -51,7 +51,7 @@ public class StatisticsController {
 
     @Operation(summary = "add action data from CSV")
     @RequestMapping(
-            path = "action",
+            path = "actions",
             method = RequestMethod.POST,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "application/json")
@@ -62,7 +62,7 @@ public class StatisticsController {
 
     @Operation(summary = "get views from DB(for tests)")
     @RequestMapping(
-            path = "viewscount",
+            path = "views",
             method = RequestMethod.GET,
             produces = {"application/json"})
 
@@ -72,7 +72,7 @@ public class StatisticsController {
 
     @Operation(summary = "get actions from DB(for tests)")
     @RequestMapping(
-            path = "getactions",
+            path = "actions",
             method = RequestMethod.GET,
             produces = {"application/json"})
     public ResponseEntity<Iterable<ActionEntity>> getActions() {
@@ -81,7 +81,7 @@ public class StatisticsController {
 
     @Operation(summary = "Calculate number of views for given mmDma and dates")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "mmDma number calculated")})
-    @GetMapping(value = "/mmDma_num", produces = {"application/json"})
+    @GetMapping(value = "/views/mmDma", produces = {"application/json"})
     public ResponseEntity<List<Integer>> getNumMmaByDates(
             @Parameter(description = "Date from", required = true)
             @RequestParam(value = "dateFrom")
@@ -98,7 +98,7 @@ public class StatisticsController {
 
     @Operation(summary = "Calculate number of views for given sideId and dates")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "SiteId number calculated")})
-    @GetMapping(value = "/site_id_num", produces = {"application/json"})
+    @GetMapping(value = "/views/site_id", produces = {"application/json"})
     public ResponseEntity<List<Integer>> getSiteIdNumsByDates(
             @Parameter(description = "Date from", required = true)
             @RequestParam(value = "dateFrom")
@@ -115,7 +115,7 @@ public class StatisticsController {
 
     @Operation(summary = "CTR for MmDma")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of pairs of mmDma and CTR")})
-    @GetMapping(value = "/mmdma_ctr", produces = {"application/json"})
+    @GetMapping(value = "/views/mmdma_ctr", produces = {"application/json"})
     public ResponseEntity<List<MmDmaCTR>> getMmDmaCTR() {
         List<MmDmaCTR> pairList = statisticsService.getMmDmaCTR();
         return ResponseEntity.ok(pairList);
@@ -123,7 +123,7 @@ public class StatisticsController {
 
     @Operation(summary = "CTR for site id")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of pairs of site id and CTR")})
-    @GetMapping(value = "/site_id_ctr", produces = {"application/json"})
+    @GetMapping(value = "/views/site_id_ctr", produces = {"application/json"})
     public ResponseEntity<List<SiteIdCTR>> getSiteIdCTR() {
         List<SiteIdCTR> pairList = statisticsService.getSiteIdCTR();
         return ResponseEntity.ok(pairList);
