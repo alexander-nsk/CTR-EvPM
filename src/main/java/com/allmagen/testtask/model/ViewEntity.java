@@ -10,10 +10,12 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(indexes = {
-        @Index(name = "mmDmaX", columnList = "mmDma"),
-        @Index(name = "siteIdX", columnList = "siteId")
-})
+@Table(name = "views_table",
+        indexes = {
+                @Index(name = "mmDmaIndex", columnList = "mmDma"),
+                @Index(name = "siteIdIndex", columnList = "siteId"),
+                @Index(name = "regTimeIndex", columnList = "regTime")
+        })
 public class ViewEntity {
     @Id
     @Column(unique = true)

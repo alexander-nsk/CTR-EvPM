@@ -8,7 +8,6 @@ import com.allmagen.testtask.model.dto.MmDmaCTR;
 import com.allmagen.testtask.model.dto.SiteIdCTR;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-import com.opencsv.exceptions.CsvException;
 import com.opencsv.exceptions.CsvValidationException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -40,7 +39,7 @@ public class StatisticsService {
     }
 
     @Transactional
-    public Iterable<ViewEntity> uploadViewsFromFile(MultipartFile file) throws CsvValidationException, IOException {
+    public void uploadViewsFromFile(MultipartFile file) throws CsvValidationException, IOException {
         LOGGER.log(Level.INFO, "Upload views from file " + file.getOriginalFilename() + " started");
 
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream())); CSVReader csvReader = new CSVReaderBuilder(fileReader).build()) {
@@ -49,12 +48,14 @@ public class StatisticsService {
 
             List<ViewEntity> viewEntityList = new ArrayList<>();
 
-            while (csvReader.iterator().hasNext()) {
+            while (true) {
                 String[] csvLine = csvReader.readNext();
+                if (csvLine == null) {
+                    break;
+                }
 
                 if (csvLine.length != 10) {
                     String error = "View csvLine should has length 10";
-                    LOGGER.log(Level.ERROR, error);
                     throw new RuntimeException(error);
                 }
 
@@ -62,9 +63,9 @@ public class StatisticsService {
                 viewEntityList.add(viewEntity);
             }
 
-            LOGGER.log(Level.INFO, "Upload views from file " + file.getOriginalFilename() + " finished");
+            viewRepository.saveAll(viewEntityList);
 
-            return viewRepository.saveAll(viewEntityList);
+            LOGGER.log(Level.INFO, "Upload views from file " + file.getOriginalFilename() + " finished: " + viewEntityList.size());
         }
     }
 
@@ -84,7 +85,7 @@ public class StatisticsService {
     }
 
     @Transactional
-    public void uploadActionsFromFile(MultipartFile file) {
+    public void uploadActionsFromFile(MultipartFile file) throws CsvValidationException, IOException {
         LOGGER.log(Level.INFO, "Upload actions from file " + file.getOriginalFilename() + " started");
 
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream())); CSVReader csvReader = new CSVReaderBuilder(fileReader).build()) {
@@ -101,7 +102,6 @@ public class StatisticsService {
 
                 if (csvLine.length != 2) {
                     String error = "Action csvLine should has length 2";
-                    LOGGER.log(Level.ERROR, error);
                     throw new RuntimeException(error);
                 }
 
@@ -128,21 +128,9 @@ public class StatisticsService {
                     .collect(Collectors.toList());
 
             actionRepository.saveAll(actionEntities);
-            LOGGER.log(Level.INFO, "Upload actions from file " + file.getOriginalFilename() + " finished");
 
-        } catch (IOException | CsvException e) {
-            LOGGER.log(Level.ERROR, "Upload actions from file " + file.getOriginalFilename() + " failed");
-            LOGGER.log(Level.ERROR, e);
-            throw new RuntimeException(e);
+            LOGGER.log(Level.INFO, "Upload actions from file " + file.getOriginalFilename() + " finished: " + actionEntities.size());
         }
-    }
-
-    public Iterable<ViewEntity> getAllViews() {
-        return viewRepository.findAll();
-    }
-
-    public Iterable<ActionEntity> getAllActions() {
-        return actionRepository.findAll();
     }
 
     public List<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate, int mmDma) {
@@ -154,14 +142,18 @@ public class StatisticsService {
     }
 
     public List<MmDmaCTR> getMmDmaCTR(String tag) {
-        return Optional.ofNullable(tag)
-                .map(viewRepository::getMmDmaCTR)
-                .orElseGet(viewRepository::getMmDmaCTR);
+        return viewRepository.getMmDmaCTR(tag);
+    }
+
+    public List<MmDmaCTR> getMmDmaCTR() {
+        return viewRepository.getMmDmaCTR();
     }
 
     public List<SiteIdCTR> getSiteIdCTR(String tag) {
-        return Optional.ofNullable(tag)
-                .map(viewRepository::getSiteIdCTR)
-                .orElseGet(viewRepository::getSiteIdCTR);
+        return viewRepository.getSiteIdCTR(tag);
+    }
+
+    public List<SiteIdCTR> getSiteIdCTR() {
+        return viewRepository.getSiteIdCTR();
     }
 }

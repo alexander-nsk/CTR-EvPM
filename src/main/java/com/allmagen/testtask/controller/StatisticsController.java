@@ -1,22 +1,21 @@
 package com.allmagen.testtask.controller;
 
-import com.allmagen.testtask.model.ActionEntity;
-import com.allmagen.testtask.model.ViewEntity;
 import com.allmagen.testtask.model.dto.MmDmaCTR;
 import com.allmagen.testtask.model.dto.SiteIdCTR;
 import com.allmagen.testtask.service.StatisticsService;
+import com.opencsv.exceptions.CsvValidationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -35,18 +34,9 @@ public class StatisticsController {
             method = RequestMethod.POST,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "application/json")
-    public ResponseEntity<OperationResponse<Iterable<ViewEntity>>> uploadViewsFromFile(@RequestPart(value = "file") MultipartFile multipartFile) {
-        try {
-            Iterable<ViewEntity> viewEntities = statisticsService.uploadViewsFromFile(multipartFile);
-            OperationResponse<Iterable<ViewEntity>> operationResponse = new OperationResponse<>(true);
-            operationResponse.setData(viewEntities);
-            return ResponseEntity.ok(operationResponse);
-        } catch (Exception e) {
-            System.out.println("Error adding view data from CSV");
-            OperationResponse<Iterable<ViewEntity>> operationResponse = new OperationResponse<>(false);
-            operationResponse.setErrorMessage("Error adding view data from CSV: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(operationResponse);
-        }
+    public ResponseEntity<String> uploadViewsFromFile(@RequestPart(value = "file") MultipartFile multipartFile) throws CsvValidationException, IOException {
+        statisticsService.uploadViewsFromFile(multipartFile);
+        return ResponseEntity.ok("views uploaded");
     }
 
     @Operation(summary = "add action data from CSV")
@@ -55,9 +45,9 @@ public class StatisticsController {
             method = RequestMethod.POST,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "application/json")
-    public ResponseEntity<String> uploadActionsFromFile(@RequestPart(value = "file") MultipartFile multipartFile) {
+    public ResponseEntity<String> uploadActionsFromFile(@RequestPart(value = "file") MultipartFile multipartFile) throws CsvValidationException, IOException {
         statisticsService.uploadActionsFromFile(multipartFile);
-        return ResponseEntity.ok("ок");
+        return ResponseEntity.ok("actions uploaded");
     }
 
     @Operation(summary = "Calculate number of views for given mmDma and dates")
@@ -97,7 +87,15 @@ public class StatisticsController {
     @Operation(summary = "CTR for MmDma")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of pairs of mmDma and CTR")})
     @GetMapping(value = "/views/ctrByMmDma", produces = {"application/json"})
-    public ResponseEntity<List<MmDmaCTR>> getMmDmaCTR(@Parameter(description = "tag") @RequestParam(required = false) String tag) {
+    public ResponseEntity<List<MmDmaCTR>> getMmDmaCTR() {
+        List<MmDmaCTR> pairList = statisticsService.getMmDmaCTR();
+        return ResponseEntity.ok(pairList);
+    }
+
+    @Operation(summary = "CTR for MmDma")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of pairs of mmDma and CTR")})
+    @GetMapping(value = "/views/ctrByMmDmaByTag", produces = {"application/json"})
+    public ResponseEntity<List<MmDmaCTR>> getMmDmaCTRByTag(@Parameter(description = "tag") String tag) {
         List<MmDmaCTR> pairList = statisticsService.getMmDmaCTR(tag);
         return ResponseEntity.ok(pairList);
     }
@@ -105,38 +103,16 @@ public class StatisticsController {
     @Operation(summary = "CTR for site id")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of pairs of site id and CTR")})
     @GetMapping(value = "/views/ctrBySiteId", produces = {"application/json"})
-    public ResponseEntity<List<SiteIdCTR>> getSiteIdCTR(@Parameter(description = "tag") @RequestParam(required = false) String tag) {
-        List<SiteIdCTR> pairList = statisticsService.getSiteIdCTR(tag);
+    public ResponseEntity<List<SiteIdCTR>> getSiteIdCTR() {
+        List<SiteIdCTR> pairList = statisticsService.getSiteIdCTR();
         return ResponseEntity.ok(pairList);
     }
 
-    private class OperationResponse<T> {
-        private final boolean success;
-        private T data;
-        private String errorMessage;
-
-        public OperationResponse(boolean success) {
-            this.success = success;
-        }
-
-        public T getData() {
-            return data;
-        }
-
-        public void setData(T data) {
-            this.data = data;
-        }
-
-        public String getErrorMessage() {
-            return errorMessage;
-        }
-
-        public void setErrorMessage(String errorMessage) {
-            this.errorMessage = errorMessage;
-        }
-
-        public boolean isSuccess() {
-            return success;
-        }
+    @Operation(summary = "CTR for site id")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of pairs of site id and CTR")})
+    @GetMapping(value = "/views/ctrBySiteIdByTag", produces = {"application/json"})
+    public ResponseEntity<List<SiteIdCTR>> getSiteIdCTRByTag(@Parameter(description = "tag") String tag) {
+        List<SiteIdCTR> pairList = statisticsService.getSiteIdCTR(tag);
+        return ResponseEntity.ok(pairList);
     }
 }

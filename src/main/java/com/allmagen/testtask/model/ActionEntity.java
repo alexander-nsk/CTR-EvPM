@@ -6,7 +6,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
-@Table
+@Table(name = "actions_table",
+        indexes = {
+                @Index(name = "uidIndex", columnList = "uid")})
 public class ActionEntity {
     @EmbeddedId
     private UidTag uidTag;

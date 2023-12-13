@@ -34,7 +34,7 @@ public interface ViewRepository extends CrudRepository<ViewEntity, String> {
     @Query("SELECT ve.mmDma AS mmDma, " +
             "SUM(COALESCE(ae.count, 0)) * 1.0 / COUNT(DISTINCT ve.uid) AS ctr " +
             "FROM ViewEntity ve " +
-            "FULL JOIN ActionEntity ae ON (ve.uid = ae.uidTag.viewEntity.uid AND ae.uidTag.tag = :tag) " +
+            "FULL JOIN ActionEntity ae ON (ve.uid = ae.uidTag.viewEntity.uid AND (ae.uidTag.tag = :tag OR ae.uidTag.tag = CONCAT('v', :tag))) " +
             "WHERE ve.mmDma IS NOT NULL " +
             "GROUP BY ve.mmDma")
     List<MmDmaCTR> getMmDmaCTR(String tag);
@@ -50,7 +50,7 @@ public interface ViewRepository extends CrudRepository<ViewEntity, String> {
     @Query("SELECT ve.siteId AS siteId, " +
             "SUM(COALESCE(ae.count, 0)) * 1.0 / COUNT(DISTINCT ve.uid) AS ctr " +
             "FROM ViewEntity ve " +
-            "FULL JOIN ActionEntity ae ON (ve.uid = ae.uidTag.viewEntity.uid AND ae.uidTag.tag = :tag) " +
+            "FULL JOIN ActionEntity ae ON (ve.uid = ae.uidTag.viewEntity.uid AND (ae.uidTag.tag = :tag OR ae.uidTag.tag = CONCAT('v', :tag))) " +
             "WHERE ve.siteId IS NOT NULL " +
             "GROUP BY ve.siteId")
     List<SiteIdCTR> getSiteIdCTR(String tag);
