@@ -9,6 +9,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * Entity class representing views.
+ * Views are persisted in a relational database using JPA.
+ **/
 @Entity
 @Table(name = "views_table",
         indexes = {
@@ -114,22 +118,6 @@ public class ViewEntity {
 
     public void setSiteId(String siteId) {
         this.siteId = siteId;
-    }
-
-    @Override
-    public String toString() {
-        return "ViewEntity{" +
-                "id=" + uid +
-                ", regTime=" + regTime +
-                ", fcImpChk=" + fcImpChk +
-                ", fcTimeChk=" + fcTimeChk +
-                ", utmtr=" + utmtr +
-                ", mmDma=" + mmDma +
-                ", osName='" + osName + '\'' +
-                ", model='" + model + '\'' +
-                ", hardware='" + hardware + '\'' +
-                ", siteId='" + siteId + '\'' +
-                '}';
     }
 
     @Override

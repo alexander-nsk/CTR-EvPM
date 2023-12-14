@@ -13,11 +13,21 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.io.IOException;
 
+/**
+ * Exception handler for handling different types of exceptions.
+ */
 @ControllerAdvice
 public class ErrorHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(ErrorHandler.class);
 
+    /**
+     * Handles runtime exceptions and returns a Bad Request response.
+     *
+     * @param ex      The runtime exception.
+     * @param request The web request.
+     * @return A ResponseEntity with a Bad Request status and error message.
+     */
     @ExceptionHandler(RuntimeException.class)
     public final ResponseEntity<String> handleRuntimeException(final RuntimeException ex,
                                                                final WebRequest request) {
@@ -27,6 +37,13 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 
+    /**
+     * Handles CsvValidationException and returns a Bad Request response.
+     *
+     * @param ex      The CsvValidationException.
+     * @param request The web request.
+     * @return A ResponseEntity with a Bad Request status and error message.
+     */
     @ExceptionHandler(CsvValidationException.class)
     public final ResponseEntity<String> handleCsvValidationException(final CsvValidationException ex,
                                                                      final WebRequest request) {
@@ -38,6 +55,13 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 
+    /**
+     * Handles IOException and returns a Bad Request response.
+     *
+     * @param ex      The IOException.
+     * @param request The web request.
+     * @return A ResponseEntity with a Bad Request status and error message.
+     */
     @ExceptionHandler(IOException.class)
     public final ResponseEntity<String> handleIOException(final IOException ex,
                                                           final WebRequest request) {

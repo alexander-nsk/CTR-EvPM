@@ -6,7 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @OpenAPIDefinition(
-        info = @Info(title = "Allmagen", version = "0.0.1", description = "Test API Documentation.")
+        info = @Info(title = "Allmagen", version = "0.0.1", description = "API Documentation.")
 )
 @SpringBootApplication
 public class TestTaskApplication {

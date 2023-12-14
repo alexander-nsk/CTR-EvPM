@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 
 import java.util.Objects;
 
+/**
+ * Entity class representing actions.
+ * Actions are persisted in a relational database using JPA.
+ **/
 @Entity
 @Table(name = "actions_table",
         indexes = {

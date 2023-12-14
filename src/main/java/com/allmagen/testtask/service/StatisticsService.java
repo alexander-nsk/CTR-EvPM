@@ -39,11 +39,31 @@ public class StatisticsService {
         this.actionRepository = actionRepository;
     }
 
+    /**
+     * Uploads views from a CSV file specified in the provided {@link MultipartFile}.
+     *
+     * @param file containing the CSV file data.
+     * @return The number of views successfully uploaded from the file.
+     * @throws CsvValidationException If there is an error during CSV validation.
+     * @throws IOException            If an I/O error occurs while reading the CSV file.
+     * @throws RuntimeException       If the length of any CSV line does not match the expected length of 10 elements.
+     * @see #uploadViewsFromFile(InputStream, String)
+     */
     @Transactional
     public int uploadViewsFromFile(MultipartFile file) throws CsvValidationException, IOException {
         return uploadViewsFromFile(file.getInputStream(), file.getOriginalFilename());
     }
 
+    /**
+     * Uploads views from a CSV file.
+     *
+     * @param inputStream The input stream of the CSV file.
+     * @param fileName    The name of the CSV file being processed.
+     * @return The number of views successfully uploaded from the file.
+     * @throws CsvValidationException If there is an error during CSV validation.
+     * @throws IOException            If an I/O error occurs while reading the CSV file.
+     * @throws RuntimeException       If the length of any CSV line does not match the expected length of 10 elements.
+     */
     private int uploadViewsFromFile(InputStream inputStream, String fileName) throws CsvValidationException, IOException {
         LOGGER.log(Level.INFO, "Upload views from file " + fileName + " started");
 
@@ -78,25 +98,51 @@ public class StatisticsService {
         }
     }
 
+    /**
+     * Parses a CSV line and creates a ViewEntity object.
+     *
+     * @param csvLine The CSV line to parse.
+     * @return A ViewEntity representing the parsed data.
+     * @throws NumberFormatException If there is an error parsing numeric values from the CSV line.
+     */
     private ViewEntity parseViewEntity(String[] csvLine) {
-        ViewEntity viewEntity = new ViewEntity(csvLine[XColumns.UID.value]);
-        viewEntity.setRegTime(LocalDateTime.parse(csvLine[XColumns.REG_TIME.value], formatter));
-        viewEntity.setFcImpChk(Integer.parseInt(csvLine[XColumns.FC_IMP_CHK.value]));
-        viewEntity.setFcTimeChk(Integer.parseInt(csvLine[XColumns.FC_TIME_CHK.value]));
-        viewEntity.setUtmtr(Integer.parseInt(csvLine[XColumns.UTMR.value]));
-        viewEntity.setMmDma(Integer.parseInt(csvLine[XColumns.MM_DMA.value]));
-        viewEntity.setOsName(csvLine[XColumns.OS_NAME.value]);
-        viewEntity.setModel(csvLine[XColumns.MODEL.value]);
-        viewEntity.setHardware(csvLine[XColumns.HARDWARE.value]);
-        viewEntity.setSiteId(csvLine[XColumns.SITE_ID.value]);
+        ViewEntity viewEntity = new ViewEntity(csvLine[ViewColumn.UID.value]);
+        viewEntity.setRegTime(LocalDateTime.parse(csvLine[ViewColumn.REG_TIME.value], formatter));
+        viewEntity.setFcImpChk(Integer.parseInt(csvLine[ViewColumn.FC_IMP_CHK.value]));
+        viewEntity.setFcTimeChk(Integer.parseInt(csvLine[ViewColumn.FC_TIME_CHK.value]));
+        viewEntity.setUtmtr(Integer.parseInt(csvLine[ViewColumn.UTMR.value]));
+        viewEntity.setMmDma(Integer.parseInt(csvLine[ViewColumn.MM_DMA.value]));
+        viewEntity.setOsName(csvLine[ViewColumn.OS_NAME.value]);
+        viewEntity.setModel(csvLine[ViewColumn.MODEL.value]);
+        viewEntity.setHardware(csvLine[ViewColumn.HARDWARE.value]);
+        viewEntity.setSiteId(csvLine[ViewColumn.SITE_ID.value]);
         return viewEntity;
     }
 
+    /**
+     * Uploads action data from a CSV file specified in the provided {@link MultipartFile}.
+     *
+     * @param file containing the CSV file data.
+     * @return The number of actions successfully uploaded from the file.
+     * @throws CsvValidationException If there is an error during CSV validation.
+     * @throws IOException            If an I/O error occurs while reading the CSV file.
+     * @throws RuntimeException       If the length of any CSV line does not match the expected length of 2 elements.
+     */
     @Transactional
     public int uploadActionsFromFile(MultipartFile file) throws CsvValidationException, IOException {
         return uploadActionsFromFile(file.getInputStream(), file.getOriginalFilename());
     }
 
+    /**
+     * Uploads action data from a CSV file specified in the provided {@link InputStream} and file name.
+     *
+     * @param inputStream containing the CSV file data.
+     * @param fileName    The name of the CSV file.
+     * @return The number of actions successfully uploaded from the file.
+     * @throws CsvValidationException If there is an error during CSV validation.
+     * @throws IOException            If an I/O error occurs while reading the CSV file.
+     * @throws RuntimeException       If the length of any CSV line does not match the expected length of 2 elements.
+     */
     private int uploadActionsFromFile(InputStream inputStream, String fileName) throws CsvValidationException, IOException {
         LOGGER.log(Level.INFO, "Upload actions from file " + fileName + " started");
 
@@ -117,7 +163,7 @@ public class StatisticsService {
                     throw new RuntimeException(error);
                 }
 
-                String uid = csvLine[YColumns.UID.value];
+                String uid = csvLine[ActionColumn.UID.value];
                 Optional<ViewEntity> optionalViewEntity = viewRepository.findById(uid);
                 if (optionalViewEntity.isEmpty()) {
                     LOGGER.log(Level.INFO, "Action with UID " + uid + " does not exist in the view table.");
@@ -126,7 +172,7 @@ public class StatisticsService {
 
                 ViewEntity viewEntity = optionalViewEntity.get();
 
-                ActionEntity action = new ActionEntity(viewEntity, csvLine[YColumns.TAG.value]);
+                ActionEntity action = new ActionEntity(viewEntity, csvLine[ActionColumn.TAG.value]);
                 if (actionsMap.containsKey(action)) {
                     actionsMap.put(action, actionsMap.get(action) + 1);
                 } else {
@@ -152,36 +198,72 @@ public class StatisticsService {
         }
     }
 
+    /**
+     * Retrieves the number of views for a given mmDma within the specified date range.
+     *
+     * @param startDate The start date of the date range.
+     * @param endDate   The end date of the date range.
+     * @param mmDma     The mmDma for which to calculate the number of views.
+     * @return A list of integers representing the number of views for the given mmDma and dates.
+     */
     public List<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate, int mmDma) {
         return viewRepository.getNumMmaByDates(startDate, endDate, mmDma);
     }
 
+    /**
+     * Retrieves the number of views for a given siteId within the specified date range.
+     *
+     * @param startDate The start date of the date range.
+     * @param endDate   The end date of the date range.
+     * @param siteId    The siteId for which to calculate the number of views.
+     * @return A list of integers representing the number of views for the given siteId and dates.
+     */
     public List<Integer> getNumSiteIdByDates(LocalDate startDate, LocalDate endDate, String siteId) {
         return viewRepository.getNumSiteIdByDates(startDate, endDate, siteId);
     }
 
+    /**
+     * Retrieves the CTR for MmDma with a specific tag.
+     *
+     * @param tag The tag to filter the results.
+     * @return A list of  MmDmaCTR representing the MmDma and CTR pairs with the specified tag.
+     */
     public List<MmDmaCTR> getMmDmaCTR(String tag) {
         return viewRepository.getMmDmaCTR(tag);
     }
 
+    /**
+     * Retrieves the CTR for MmDma.
+     *
+     * @return A list of MmDmaCTR representing the MmDma and CTR pairs.
+     */
     public List<MmDmaCTR> getMmDmaCTR() {
         return viewRepository.getMmDmaCTR();
     }
 
+    /**
+     * Retrieves the CTR for SiteId with a specific tag.
+     *
+     * @param tag The tag to filter the results.
+     * @return A list of SiteIdCTR representing the SiteId and CTR pairs with the specified tag.
+     */
     public List<SiteIdCTR> getSiteIdCTR(String tag) {
         return viewRepository.getSiteIdCTR(tag);
     }
 
+    /**
+     * Retrieves the CTR for SiteId.
+     *
+     * @return A list of SiteIdCTR representing the SiteId and CTR pairs.
+     */
     public List<SiteIdCTR> getSiteIdCTR() {
         return viewRepository.getSiteIdCTR();
     }
 
-    public void clearDatabaseTables() {
-        actionRepository.deleteAll();
-        viewRepository.deleteAll();
-    }
-
-    private enum XColumns {
+    /**
+     * Enumeration representing the columns in the CSV file used for ViewEntity.
+     */
+    private enum ViewColumn {
         REG_TIME(0),
         UID(1),
         FC_IMP_CHK(2),
@@ -195,18 +277,21 @@ public class StatisticsService {
 
         private final int value;
 
-        XColumns(int value) {
+        ViewColumn(int value) {
             this.value = value;
         }
     }
 
-    private enum YColumns {
+    /**
+     * Enumeration representing the columns in the CSV file used for ActionEntity.
+     */
+    private enum ActionColumn {
         UID(0),
         TAG(1);
 
         private final int value;
 
-        YColumns(int value) {
+        ActionColumn(int value) {
             this.value = value;
         }
     }

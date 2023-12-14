@@ -130,4 +130,4 @@ This section provides examples demonstrating the usage of the Statistics Control
 
 ### cURL Example
 ```bash
-curl -X POST -H "Content-Type: multipart/form-data" -F "file=@views_data.csv" http://localhost:8080/views
+curl -X POST -H "Content-Type: multipart/form-data" -F "file=@interview.x.small.csv" http://localhost:8080/views
