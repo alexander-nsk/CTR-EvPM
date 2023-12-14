@@ -34,7 +34,7 @@ public class StatisticsService {
     private final ActionRepository actionRepository;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private final static String INTERVIEW_X = "testdata/interview.x.csv";
+    private final static String INTERVIEW_X = "testdata/interview.x.small.csv";
     private final static String INTERVIEW_Y = "testdata/interview.y.csv";
 
     public StatisticsService(ViewRepository viewRepository, ActionRepository actionRepository) {
@@ -162,7 +162,7 @@ public class StatisticsService {
         int viewsNumber = uploadViewsFromFile(getClass().getClassLoader().getResourceAsStream(INTERVIEW_X), INTERVIEW_X);
         int actionsNumber = uploadActionsFromFile(getClass().getClassLoader().getResourceAsStream(INTERVIEW_Y), INTERVIEW_Y);
 
-        return "View uploaded:" + viewsNumber + ", Actions uploaded: " + actionsNumber;
+        return "Views uploaded:" + viewsNumber + ", Actions uploaded:" + actionsNumber;
     }
 
     public List<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate, int mmDma) {
