@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +43,7 @@ public class StatisticsController {
     @RequestMapping(
             path = "actions",
             method = RequestMethod.POST,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "text/plain")
     public ResponseEntity<String> uploadActionsFromFile(@RequestPart(value = "file") MultipartFile multipartFile) throws CsvValidationException, IOException {
         int actionsNumber = statisticsService.uploadActionsFromFile(multipartFile);
@@ -53,7 +53,7 @@ public class StatisticsController {
     @Operation(summary = "Calculate number of views for given mmDma and dates")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Number of views calculated for mmDma")})
     @GetMapping(value = "/views/allByMmDma", produces = {"application/json"})
-    public ResponseEntity<List<Integer>> getNumMmaByDates(
+    public ResponseEntity<ListResponse<Integer>> getNumMmaByDates(
             @Parameter(description = "Date from", required = true)
             @RequestParam(value = "dateFrom")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateFrom,
@@ -64,13 +64,13 @@ public class StatisticsController {
 
         List<Integer> mmDmaNums = statisticsService.getNumMmaByDates(dateFrom, dateTo, mmDma);
 
-        return ResponseEntity.ok(mmDmaNums);
+        return ResponseEntity.ok(new ListResponse<>(mmDmaNums));
     }
 
     @Operation(summary = "Calculate number of views for given siteId and dates")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Number of views calculated for siteId")})
     @GetMapping(value = "/views/allBySiteId", produces = {"application/json"})
-    public ResponseEntity<List<Integer>> getSiteIdNumsByDates(
+    public ResponseEntity<ListResponse<Integer>> getSiteIdNumsByDates(
             @Parameter(description = "Date from", required = true)
             @RequestParam(value = "dateFrom")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateFrom,
@@ -81,38 +81,56 @@ public class StatisticsController {
 
         List<Integer> siteIdNums = statisticsService.getNumSiteIdByDates(dateFrom, dateTo, siteId);
 
-        return ResponseEntity.ok(siteIdNums);
+        return ResponseEntity.ok(new ListResponse<>(siteIdNums));
     }
 
     @Operation(summary = "CTR for MmDma")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of mmDma and CTR pairs")})
     @GetMapping(value = "/views/ctrByMmDma", produces = {"application/json"})
-    public ResponseEntity<List<MmDmaCTR>> getMmDmaCTR() {
+    public ResponseEntity<ListResponse<MmDmaCTR>> getMmDmaCTR() {
         List<MmDmaCTR> pairList = statisticsService.getMmDmaCTR();
-        return ResponseEntity.ok(pairList);
+        return ResponseEntity.ok(new ListResponse<>(pairList));
     }
 
     @Operation(summary = "CTR for MmDma with Tag")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of mmDma and CTR pairs with a specific tag")})
     @GetMapping(value = "/views/ctrByMmDmaByTag", produces = {"application/json"})
-    public ResponseEntity<List<MmDmaCTR>> getMmDmaCTRByTag(@Parameter(description = "Tag") String tag) {
+    public ResponseEntity<ListResponse<MmDmaCTR>> getMmDmaCTRByTag(@Parameter(description = "Tag") String tag) {
         List<MmDmaCTR> pairList = statisticsService.getMmDmaCTR(tag);
-        return ResponseEntity.ok(pairList);
+        return ResponseEntity.ok(new ListResponse<>(pairList));
     }
 
     @Operation(summary = "CTR for SiteId")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of siteId and CTR pairs")})
     @GetMapping(value = "/views/ctrBySiteId", produces = {"application/json"})
-    public ResponseEntity<List<SiteIdCTR>> getSiteIdCTR() {
+    public ResponseEntity<ListResponse<SiteIdCTR>> getSiteIdCTR() {
         List<SiteIdCTR> pairList = statisticsService.getSiteIdCTR();
-        return ResponseEntity.ok(pairList);
+        return ResponseEntity.ok(new ListResponse<>(pairList));
     }
 
     @Operation(summary = "CTR for SiteId with Tag")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of siteId and CTR pairs with a specific tag")})
     @GetMapping(value = "/views/ctrBySiteIdByTag", produces = {"application/json"})
-    public ResponseEntity<List<SiteIdCTR>> getSiteIdCTRByTag(@Parameter(description = "Tag") String tag) {
+    public ResponseEntity<ListResponse<SiteIdCTR>> getSiteIdCTRByTag(@Parameter(description = "Tag") String tag) {
         List<SiteIdCTR> pairList = statisticsService.getSiteIdCTR(tag);
-        return ResponseEntity.ok(pairList);
+        return ResponseEntity.ok(new ListResponse<>(pairList));
+    }
+
+    public static class ListResponse<T> {
+        private final int count;
+        private final List<T> items;
+
+        public ListResponse(List<T> items) {
+            this.count = items.size();
+            this.items = items;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public List<T> getItems() {
+            return items;
+        }
     }
 }
