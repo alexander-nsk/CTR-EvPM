@@ -82,9 +82,8 @@ public class StatisticsService {
     }
 
     private ViewEntity parseViewEntity(String[] csvLine) {
-        ViewEntity viewEntity = new ViewEntity();
+        ViewEntity viewEntity = new ViewEntity(csvLine[XColumns.UID.value]);
         viewEntity.setRegTime(LocalDateTime.parse(csvLine[XColumns.REG_TIME.value], formatter));
-        viewEntity.setUid(csvLine[XColumns.UID.value]);
         viewEntity.setFcImpChk(Integer.parseInt(csvLine[XColumns.FC_IMP_CHK.value]));
         viewEntity.setFcTimeChk(Integer.parseInt(csvLine[XColumns.FC_TIME_CHK.value]));
         viewEntity.setUtmtr(Integer.parseInt(csvLine[XColumns.UTMR.value]));

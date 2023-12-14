@@ -12,7 +12,7 @@ import java.util.Objects;
         })
 public class ActionEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne
@@ -26,6 +26,15 @@ public class ActionEntity {
     }
 
     public ActionEntity(ViewEntity viewEntity, String tag) {
+        this.viewEntity = viewEntity;
+        this.tag = tag;
+    }
+
+    /**
+     * For tests
+     */
+    public ActionEntity(Long id, ViewEntity viewEntity, String tag) {
+        this.id = id;
         this.viewEntity = viewEntity;
         this.tag = tag;
     }

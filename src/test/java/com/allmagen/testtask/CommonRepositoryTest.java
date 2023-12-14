@@ -19,7 +19,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestTaskApplication.class)
@@ -34,21 +33,29 @@ public class CommonRepositoryTest {
     public static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:15-alpine3.17")
             .withDatabaseName("mydb")
             .withUsername("myuser")
-            .withPassword("mypas");
+            .withPassword("mypass");
 
     @Test
     @Transactional
     public void givenViewsInDB_WhenCheckViewsNumber() {
-        ViewEntity viewEntity1 = new ViewEntity();
-        viewEntity1.setUid("1");
-
-        ViewEntity viewEntity2 = new ViewEntity();
-        viewEntity2.setUid("2");
-
-        viewRepository.save(viewEntity1);
-        viewRepository.save(viewEntity2);
+        viewRepository.save(new ViewEntity("1"));
+        viewRepository.save(new ViewEntity("2"));
 
         long count = viewRepository.count();
+
+        assertThat(count).isEqualTo(2);
+    }
+
+    @Test
+    @Transactional
+    public void givenActionsInDB_WhenCheckActionsNumber() {
+        viewRepository.save(new ViewEntity("1"));
+        viewRepository.save(new ViewEntity("2"));
+
+        actionRepository.save(new ActionEntity(1L, new ViewEntity("1"), "11"));
+        actionRepository.save(new ActionEntity(2L, new ViewEntity("2"), "22"));
+
+        long count = actionRepository.count();
 
         assertThat(count).isEqualTo(2);
     }

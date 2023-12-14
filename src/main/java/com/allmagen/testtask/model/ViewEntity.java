@@ -35,7 +35,10 @@ public class ViewEntity {
         return uid;
     }
 
-    public void setUid(String uid) {
+    public ViewEntity() {
+    }
+
+    public ViewEntity(String uid) {
         this.uid = uid;
     }
 
