@@ -3,6 +3,7 @@ package com.allmagen.testtask.repository;
 import com.allmagen.testtask.model.ViewEntity;
 import com.allmagen.testtask.model.metrics.MmDmaCTR;
 import com.allmagen.testtask.model.metrics.SiteIdCTR;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -12,7 +13,7 @@ import java.util.List;
 
 
 @Repository
-public interface ViewRepository extends CrudRepository<ViewEntity, String> {
+public interface ViewRepository extends JpaRepository<ViewEntity, String> {
     @Query("SELECT COUNT(v) FROM ViewEntity v " +
             "WHERE DATE(v.regTime) >= :startDate AND DATE(v.regTime) <= :endDate AND v.mmDma = :mmDma " +
             "GROUP BY DATE(v.regTime)")

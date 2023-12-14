@@ -1,9 +1,9 @@
 package com.allmagen.testtask.repository;
 
 import com.allmagen.testtask.model.ActionEntity;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ActionRepository extends CrudRepository<ActionEntity, Long> {
+public interface ActionRepository extends JpaRepository<ActionEntity, Long> {
 }

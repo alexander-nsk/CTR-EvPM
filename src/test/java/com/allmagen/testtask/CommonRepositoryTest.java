@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestTaskApplication.class)
-@ActiveProfiles("tc")
 @ContextConfiguration(initializers = {CommonRepositoryTest.Initializer.class})
 public class CommonRepositoryTest {
     @Autowired

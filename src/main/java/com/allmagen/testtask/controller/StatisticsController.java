@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,16 +48,6 @@ public class StatisticsController {
     public ResponseEntity<String> uploadActionsFromFile(@RequestPart(value = "file") MultipartFile multipartFile) throws CsvValidationException, IOException {
         int actionsNumber = statisticsService.uploadActionsFromFile(multipartFile);
         return ResponseEntity.ok("Actions uploaded: " + actionsNumber);
-    }
-
-    @Operation(summary = "Load test data from directory resourses/testdata")
-    @RequestMapping(
-            path = "loadTestData",
-            method = RequestMethod.POST,
-            produces = "text/plain")
-    public ResponseEntity<String> uploadViewsAndActionsFromFile() throws CsvValidationException, IOException {
-        String message = statisticsService.loadTestDataToDataBase();
-        return ResponseEntity.ok(message);
     }
 
     @Operation(summary = "Calculate number of views for given mmDma and dates")
@@ -123,13 +114,5 @@ public class StatisticsController {
     public ResponseEntity<List<SiteIdCTR>> getSiteIdCTRByTag(@Parameter(description = "Tag") String tag) {
         List<SiteIdCTR> pairList = statisticsService.getSiteIdCTR(tag);
         return ResponseEntity.ok(pairList);
-    }
-
-    @Operation(summary = "Clear Database Tables")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Tables successfully cleared")})
-    @GetMapping(value = "/clearTables", produces = "text/plain")
-    public ResponseEntity<String> clearDatabaseTables() {
-        statisticsService.clearDatabaseTables();
-        return ResponseEntity.ok("Database tables cleared successfully");
     }
 }
