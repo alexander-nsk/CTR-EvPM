@@ -2,74 +2,48 @@ package com.allmagen.testtask.model;
 
 import jakarta.persistence.*;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
 @Table(name = "actions_table",
         indexes = {
-                @Index(name = "uidIndex", columnList = "uid")})
+                @Index(name = "uidIndex", columnList = "uid"),
+                @Index(name = "tagIndex", columnList = "tag")
+        })
 public class ActionEntity {
-    @EmbeddedId
-    private UidTag uidTag;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "uid", nullable = false)
+    private ViewEntity viewEntity;
+
+    private String tag;
     private int count;
 
     public ActionEntity() {
     }
 
-    public ActionEntity(UidTag uidTag, int count) {
-        this.uidTag = uidTag;
-        this.count = count;
+    public ActionEntity(ViewEntity viewEntity, String tag) {
+        this.viewEntity = viewEntity;
+        this.tag = tag;
     }
 
-    public UidTag getUidTag() {
-        return uidTag;
+    public ViewEntity getViewEntity() {
+        return viewEntity;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 
     public int getCount() {
         return count;
-    }
-
-    @Embeddable
-    public static class UidTag implements Serializable {
-        private String tag;
-
-        @ManyToOne
-        @JoinColumn(name = "uid", nullable = false)
-        private ViewEntity viewEntity;
-
-        public UidTag() {
-        }
-
-        public UidTag(String tag, ViewEntity viewEntity) {
-            this.tag = tag;
-            this.viewEntity = viewEntity;
-        }
-
-        public String getTag() {
-            return tag;
-        }
-
-        public ViewEntity getViewEntity() {
-            return viewEntity;
-        }
-
-        public void setViewEntity(ViewEntity viewEntity) {
-            this.viewEntity = viewEntity;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            UidTag uidTag = (UidTag) o;
-            return Objects.equals(tag, uidTag.tag) && Objects.equals(viewEntity, uidTag.viewEntity);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(tag, viewEntity);
-        }
     }
 
     @Override
@@ -77,11 +51,11 @@ public class ActionEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ActionEntity that = (ActionEntity) o;
-        return count == that.count && Objects.equals(uidTag, that.uidTag);
+        return count == that.count && Objects.equals(id, that.id) && Objects.equals(viewEntity, that.viewEntity) && Objects.equals(tag, that.tag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uidTag, count);
+        return Objects.hash(id, viewEntity, tag, count);
     }
 }

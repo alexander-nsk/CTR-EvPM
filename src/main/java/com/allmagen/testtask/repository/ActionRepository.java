@@ -1,4 +1,4 @@
-package com.allmagen.testtask.dao;
+package com.allmagen.testtask.repository;
 
 import com.allmagen.testtask.model.ActionEntity;
 import org.springframework.data.repository.CrudRepository;

@@ -1,11 +1,11 @@
 package com.allmagen.testtask.service;
 
-import com.allmagen.testtask.dao.ActionRepository;
-import com.allmagen.testtask.dao.ViewRepository;
 import com.allmagen.testtask.model.ActionEntity;
 import com.allmagen.testtask.model.ViewEntity;
-import com.allmagen.testtask.model.dto.MmDmaCTR;
-import com.allmagen.testtask.model.dto.SiteIdCTR;
+import com.allmagen.testtask.model.metrics.MmDmaCTR;
+import com.allmagen.testtask.model.metrics.SiteIdCTR;
+import com.allmagen.testtask.repository.ActionRepository;
+import com.allmagen.testtask.repository.ViewRepository;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,16 +34,24 @@ public class StatisticsService {
     private final ActionRepository actionRepository;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    private final static String INTERVIEW_X = "testdata/interview.x.csv";
+    private final static String INTERVIEW_Y = "testdata/interview.y.csv";
+
     public StatisticsService(ViewRepository viewRepository, ActionRepository actionRepository) {
         this.viewRepository = viewRepository;
         this.actionRepository = actionRepository;
     }
 
     @Transactional
-    public void uploadViewsFromFile(MultipartFile file) throws CsvValidationException, IOException {
-        LOGGER.log(Level.INFO, "Upload views from file " + file.getOriginalFilename() + " started");
+    public int uploadViewsFromFile(MultipartFile file) throws CsvValidationException, IOException {
+        return uploadViewsFromFile(file.getInputStream(), file.getOriginalFilename());
+    }
 
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream())); CSVReader csvReader = new CSVReaderBuilder(fileReader).build()) {
+    @Transactional
+    private int uploadViewsFromFile(InputStream inputStream, String fileName) throws CsvValidationException, IOException {
+        LOGGER.log(Level.INFO, "Upload views from file " + fileName + " started");
+
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputStream)); CSVReader csvReader = new CSVReaderBuilder(fileReader).build()) {
             // skip csv header
             csvReader.readNext();
 
@@ -65,34 +74,43 @@ public class StatisticsService {
 
             viewRepository.saveAll(viewEntityList);
 
-            LOGGER.log(Level.INFO, "Upload views from file " + file.getOriginalFilename() + " finished: " + viewEntityList.size());
+            int resultSize = viewEntityList.size();
+
+            LOGGER.log(Level.INFO, "Upload views from file " + fileName + " finished: " + resultSize);
+
+            return resultSize;
         }
     }
 
     private ViewEntity parseViewEntity(String[] csvLine) {
         ViewEntity viewEntity = new ViewEntity();
-        viewEntity.setRegTime(LocalDateTime.parse(csvLine[0], formatter));
-        viewEntity.setUid(csvLine[1]);
-        viewEntity.setFcImpChk(Integer.parseInt(csvLine[2]));
-        viewEntity.setFcTimeChk(Integer.parseInt(csvLine[3]));
-        viewEntity.setUtmtr(Integer.parseInt(csvLine[4]));
-        viewEntity.setMmDma(Integer.parseInt(csvLine[5]));
-        viewEntity.setOsName(csvLine[6]);
-        viewEntity.setModel(csvLine[7]);
-        viewEntity.setHardware(csvLine[8]);
-        viewEntity.setSiteId(csvLine[9]);
+        viewEntity.setRegTime(LocalDateTime.parse(csvLine[XColumns.REG_TIME.value], formatter));
+        viewEntity.setUid(csvLine[XColumns.UID.value]);
+        viewEntity.setFcImpChk(Integer.parseInt(csvLine[XColumns.FC_IMP_CHK.value]));
+        viewEntity.setFcTimeChk(Integer.parseInt(csvLine[XColumns.FC_TIME_CHK.value]));
+        viewEntity.setUtmtr(Integer.parseInt(csvLine[XColumns.UTMR.value]));
+        viewEntity.setMmDma(Integer.parseInt(csvLine[XColumns.MM_DMA.value]));
+        viewEntity.setOsName(csvLine[XColumns.OS_NAME.value]);
+        viewEntity.setModel(csvLine[XColumns.MODEL.value]);
+        viewEntity.setHardware(csvLine[XColumns.HARDWARE.value]);
+        viewEntity.setSiteId(csvLine[XColumns.SITE_ID.value]);
         return viewEntity;
     }
 
     @Transactional
-    public void uploadActionsFromFile(MultipartFile file) throws CsvValidationException, IOException {
-        LOGGER.log(Level.INFO, "Upload actions from file " + file.getOriginalFilename() + " started");
+    public int uploadActionsFromFile(MultipartFile file) throws CsvValidationException, IOException {
+        return uploadActionsFromFile(file.getInputStream(), file.getOriginalFilename());
+    }
 
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream())); CSVReader csvReader = new CSVReaderBuilder(fileReader).build()) {
+    @Transactional
+    private int uploadActionsFromFile(InputStream inputStream, String fileName) throws CsvValidationException, IOException {
+        LOGGER.log(Level.INFO, "Upload actions from file " + fileName + " started");
+
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputStream)); CSVReader csvReader = new CSVReaderBuilder(fileReader).build()) {
             // skip csv header
             csvReader.readNext();
 
-            Map<ActionEntity.UidTag, Integer> uidTagMap = new HashMap<>();
+            Map<ActionEntity, Integer> actionsMap = new HashMap<>();
 
             while (true) {
                 String[] csvLine = csvReader.readNext();
@@ -105,32 +123,46 @@ public class StatisticsService {
                     throw new RuntimeException(error);
                 }
 
-                String uid = csvLine[0].trim();
-                //TODO:
+                String uid = csvLine[YColumns.UID.value];
                 Optional<ViewEntity> optionalViewEntity = viewRepository.findById(uid);
                 if (optionalViewEntity.isEmpty()) {
-                    LOGGER.log(Level.INFO, uid + " not exist");
+                    LOGGER.log(Level.INFO, "action " + uid + " not exist in view_table");
                     continue;
                 }
 
                 ViewEntity viewEntity = optionalViewEntity.get();
 
-                ActionEntity.UidTag uidTag = new ActionEntity.UidTag(csvLine[1], viewEntity);
-                if (uidTagMap.containsKey(uidTag)) {
-                    uidTagMap.put(uidTag, uidTagMap.get(uidTag) + 1);
+                ActionEntity action = new ActionEntity(viewEntity, csvLine[YColumns.TAG.value]);
+                if (actionsMap.containsKey(action)) {
+                    actionsMap.put(action, actionsMap.get(action) + 1);
                 } else {
-                    uidTagMap.put(uidTag, 1);
+                    actionsMap.put(action, 1);
                 }
             }
 
-            List<ActionEntity> actionEntities = uidTagMap.entrySet().stream()
-                    .map(entry -> new ActionEntity(entry.getKey(), entry.getValue()))
+            List<ActionEntity> actionEntities = actionsMap.entrySet()
+                    .stream()
+                    .map(entry -> {
+                        ActionEntity action = entry.getKey();
+                        action.setCount(entry.getValue());
+                        return action;
+                    })
                     .collect(Collectors.toList());
 
             actionRepository.saveAll(actionEntities);
 
-            LOGGER.log(Level.INFO, "Upload actions from file " + file.getOriginalFilename() + " finished: " + actionEntities.size());
+            int actionsNumber = actionEntities.size();
+            LOGGER.log(Level.INFO, "Upload actions from file " + fileName + " finished: " + actionsNumber);
+
+            return actionsNumber;
         }
+    }
+
+    public String loadTestDataToDataBase() throws CsvValidationException, IOException {
+        int viewsNumber = uploadViewsFromFile(getClass().getClassLoader().getResourceAsStream(INTERVIEW_X), INTERVIEW_X);
+        int actionsNumber = uploadActionsFromFile(getClass().getClassLoader().getResourceAsStream(INTERVIEW_Y), INTERVIEW_Y);
+
+        return "View uploaded:" + viewsNumber + ", Actions uploaded: " + actionsNumber;
     }
 
     public List<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate, int mmDma) {
@@ -155,5 +187,40 @@ public class StatisticsService {
 
     public List<SiteIdCTR> getSiteIdCTR() {
         return viewRepository.getSiteIdCTR();
+    }
+
+    public void clearDatabaseTables() {
+        actionRepository.deleteAll();
+        viewRepository.deleteAll();
+    }
+
+    private enum XColumns {
+        REG_TIME(0),
+        UID(1),
+        FC_IMP_CHK(2),
+        FC_TIME_CHK(3),
+        UTMR(4),
+        MM_DMA(5),
+        OS_NAME(6),
+        MODEL(7),
+        HARDWARE(8),
+        SITE_ID(9);
+
+        private final int value;
+
+        XColumns(int value) {
+            this.value = value;
+        }
+    }
+
+    private enum YColumns {
+        UID(0),
+        TAG(1);
+
+        private final int value;
+
+        YColumns(int value) {
+            this.value = value;
+        }
     }
 }
