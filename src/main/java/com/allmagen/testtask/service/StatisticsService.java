@@ -47,7 +47,6 @@ public class StatisticsService {
         return uploadViewsFromFile(file.getInputStream(), file.getOriginalFilename());
     }
 
-    @Transactional
     private int uploadViewsFromFile(InputStream inputStream, String fileName) throws CsvValidationException, IOException {
         LOGGER.log(Level.INFO, "Upload views from file " + fileName + " started");
 
@@ -64,7 +63,7 @@ public class StatisticsService {
                 }
 
                 if (csvLine.length != 10) {
-                    String error = "View csvLine should has length 10";
+                    String error = "Error: The length of the CSV line should exactly match the expected length of 10 elements.";
                     throw new RuntimeException(error);
                 }
 
@@ -102,7 +101,6 @@ public class StatisticsService {
         return uploadActionsFromFile(file.getInputStream(), file.getOriginalFilename());
     }
 
-    @Transactional
     private int uploadActionsFromFile(InputStream inputStream, String fileName) throws CsvValidationException, IOException {
         LOGGER.log(Level.INFO, "Upload actions from file " + fileName + " started");
 
@@ -119,14 +117,14 @@ public class StatisticsService {
                 }
 
                 if (csvLine.length != 2) {
-                    String error = "Action csvLine should has length 2";
+                    String error = "Error: The length of the CSV line should exactly match the expected length of 2 elements";
                     throw new RuntimeException(error);
                 }
 
                 String uid = csvLine[YColumns.UID.value];
                 Optional<ViewEntity> optionalViewEntity = viewRepository.findById(uid);
                 if (optionalViewEntity.isEmpty()) {
-                    LOGGER.log(Level.INFO, "action " + uid + " not exist in view_table");
+                    LOGGER.log(Level.INFO, "Action with UID " + uid + " does not exist in the view table.");
                     continue;
                 }
 
