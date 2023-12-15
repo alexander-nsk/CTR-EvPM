@@ -45,8 +45,32 @@ This document provides an information about the API for the interaction between 
 
 # API Usage Examples
 
-## 1. Upload Views Data from CSV
+## Swagger example
 
-### cURL Example
+1. **Launch the Application:**
+    - Ensure that the application is up and running.
+    - Navigate to [http://localhost:8080/](http://localhost:8080/) in your web browser.
+
+2. **Explore the API with Swagger:**
+    - Visit [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) for an interactive Swagger UI experience.
+    - Browse available controller methods
+
+3**Upload Views and Actions Files:**
+    - Utilize the appropriate POST requests to upload view and actions files.
+    - Refer to the specific API documentation for details on file uploads.
+
+4**Test Endpoints:**
+    - Click on specific endpoints to view details.
+    - Use the "Try it out" button to test endpoints directly within Swagger UI.
+    - Provide required parameters and execute requests to see real-time responses.
+
+
+
+**Example Requests:**
+- Upload Views File:
+![img.png](img.png)
+
+## cURL Example
+### Upload Views Data from CSV
 ```bash
 curl -X POST -H "Content-Type: multipart/form-data" -F "file=@interview.x.small.csv" http://localhost:8080/views
