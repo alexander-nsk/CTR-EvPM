@@ -13,11 +13,15 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -29,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class StatisticsIntegrationTests {
     private final static String INTERVIEW_X = "classpath:testdata/interview.x.small.csv";
     private final static String INTERVIEW_Y = "classpath:testdata/interview.y.csv";
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     private MockMvc mockMvc;
@@ -113,7 +118,7 @@ public class StatisticsIntegrationTests {
 
     @Test
     public void testGetMmDmaCTR() throws Exception {
-        String responseJson = mockMvc.perform(MockMvcRequestBuilders.get("/views/ctrByMmDma")
+        String responseJson = mockMvc.perform(get("/views/ctrByMmDma")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -126,7 +131,7 @@ public class StatisticsIntegrationTests {
 
     @Test
     public void testGetMmDmaCTRByTag() throws Exception {
-        String responseJson = mockMvc.perform(MockMvcRequestBuilders.get("/views/ctrByMmDmaByTag?tag=registration")
+        String responseJson = mockMvc.perform(get("/views/ctrByMmDmaByTag?tag=registration")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -139,7 +144,7 @@ public class StatisticsIntegrationTests {
 
     @Test
     public void testGetSiteIdCTR() throws Exception {
-        String responseJson = mockMvc.perform(MockMvcRequestBuilders.get("/views/ctrBySiteId")
+        String responseJson = mockMvc.perform(get("/views/ctrBySiteId")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -152,7 +157,7 @@ public class StatisticsIntegrationTests {
 
     @Test
     public void testGetSiteIdCTRByTag() throws Exception {
-        String responseJson = mockMvc.perform(MockMvcRequestBuilders.get("/views/ctrBySiteIdByTag?tag=registration")
+        String responseJson = mockMvc.perform(get("/views/ctrBySiteIdByTag?tag=registration")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -160,6 +165,40 @@ public class StatisticsIntegrationTests {
 
         JsonNode responseNode = objectMapper.readTree(responseJson).get("items");
 
+        assertThat(responseNode.isArray()).isTrue();
+    }
+
+    @Test
+    public void testGetNumMmaByDates() throws Exception {
+        LocalDate dateFrom = LocalDate.parse("2021-07-21", formatter);
+        LocalDate dateTo = LocalDate.parse("2021-07-23", formatter);
+        int mmDma = 510;
+
+        String responseJson = mockMvc.perform(get("/views/allByMmDma")
+                        .param("dateFrom", dateFrom.toString())
+                        .param("dateTo", dateTo.toString())
+                        .param("mmDma", String.valueOf(mmDma)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode responseNode = objectMapper.readTree(responseJson).get("items");
+        assertThat(responseNode.isArray()).isTrue();
+    }
+
+    @Test
+    public void testGetNumSiteIdByDates() throws Exception {
+        LocalDate dateFrom = LocalDate.parse("2021-07-21", formatter);
+        LocalDate dateTo = LocalDate.parse("2021-07-23", formatter);
+        String siteId = "www.forbes.com";
+
+        String responseJson = mockMvc.perform(get("/views/allBySiteId")
+                        .param("dateFrom", dateFrom.toString())
+                        .param("dateTo", dateTo.toString())
+                        .param("siteId", siteId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode responseNode = objectMapper.readTree(responseJson).get("items");
         assertThat(responseNode.isArray()).isTrue();
     }
 
