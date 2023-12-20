@@ -1,23 +1,18 @@
 package com.allmagen.testtask;
 
-import com.allmagen.testtask.controller.StatisticsController;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,8 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 
 public class StatisticsIntegrationTests {
     private final static String INTERVIEW_X = "classpath:testdata/interview.x.small.csv";
@@ -37,8 +30,6 @@ public class StatisticsIntegrationTests {
 
     @Autowired
     private MockMvc mockMvc;
-    @InjectMocks
-    private StatisticsController statisticsController;
     @Autowired
     private ResourceLoader resourceLoader;
     @Autowired

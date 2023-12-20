@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class StatisticsService {
@@ -206,7 +207,8 @@ public class StatisticsService {
      * @param mmDma     The mmDma for which to calculate the number of views.
      * @return A list of integers representing the number of views for the given mmDma and dates.
      */
-    public List<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate, int mmDma) {
+    @Transactional
+    public Stream<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate, int mmDma) {
         return viewRepository.getNumMmaByDates(startDate, endDate, mmDma);
     }
 
@@ -218,7 +220,8 @@ public class StatisticsService {
      * @param siteId    The siteId for which to calculate the number of views.
      * @return A list of integers representing the number of views for the given siteId and dates.
      */
-    public List<Integer> getNumSiteIdByDates(LocalDate startDate, LocalDate endDate, String siteId) {
+    @Transactional
+    public Stream<Integer> getNumSiteIdByDates(LocalDate startDate, LocalDate endDate, String siteId) {
         return viewRepository.getNumSiteIdByDates(startDate, endDate, siteId);
     }
 
@@ -228,7 +231,8 @@ public class StatisticsService {
      * @param tag The tag to filter the results.
      * @return A list of  MmDmaCTR representing the MmDma and CTR pairs with the specified tag.
      */
-    public List<MmDmaCTR> getMmDmaCTR(String tag) {
+    @Transactional
+    public Stream<MmDmaCTR> getMmDmaCTR(String tag) {
         return viewRepository.getMmDmaCTR(tag);
     }
 
@@ -237,7 +241,8 @@ public class StatisticsService {
      *
      * @return A list of MmDmaCTR representing the MmDma and CTR pairs.
      */
-    public List<MmDmaCTR> getMmDmaCTR() {
+    @Transactional
+    public Stream<MmDmaCTR> getMmDmaCTR() {
         return viewRepository.getMmDmaCTR();
     }
 
@@ -247,7 +252,8 @@ public class StatisticsService {
      * @param tag The tag to filter the results.
      * @return A list of SiteIdCTR representing the SiteId and CTR pairs with the specified tag.
      */
-    public List<SiteIdCTR> getSiteIdCTR(String tag) {
+    @Transactional
+    public Stream<SiteIdCTR> getSiteIdCTR(String tag) {
         return viewRepository.getSiteIdCTR(tag);
     }
 
@@ -256,7 +262,8 @@ public class StatisticsService {
      *
      * @return A list of SiteIdCTR representing the SiteId and CTR pairs.
      */
-    public List<SiteIdCTR> getSiteIdCTR() {
+    @Transactional
+    public Stream<SiteIdCTR> getSiteIdCTR() {
         return viewRepository.getSiteIdCTR();
     }
 

@@ -11,11 +11,12 @@
 	<groupId>com.allmagen</groupId>
 	<artifactId>test-task</artifactId>
 	<version>0.0.1</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>test-task</name>
 	<description>CTR &amp; EvPM Analysis &amp; Visualization</description>
 	<properties>
 		<java.version>21</java.version>
+		<start-class>com.allmagen.testtask.TestTaskApplication</start-class>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -75,6 +76,15 @@
 				<configuration>
 					<source>21</source>
 					<target>21</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<mainClass>com.allmagen.testtask.TestTaskApplication</mainClass>
+					<layout>ZIP</layout>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -7,27 +7,27 @@
 
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT" follow="true">
-            <PatternLayout pattern="${LOG_PATTERN}" />
+            <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
         <RollingFile name="appLog"
                      fileName="${APP_LOG_ROOT}/SpringBoot2App/application.log"
                      filePattern="${APP_LOG_ROOT}/SpringBoot2App/application-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="${LOG_PATTERN}" />
+            <PatternLayout pattern="${LOG_PATTERN}"/>
             <Policies>
-                <SizeBasedTriggeringPolicy size="19500KB" />
+                <SizeBasedTriggeringPolicy size="19500KB"/>
             </Policies>
-            <DefaultRolloverStrategy max="1" />
+            <DefaultRolloverStrategy max="1"/>
         </RollingFile>
     </Appenders>
 
     <Loggers>
         <Logger name="com.allmagen.testtask" additivity="false">
-            <AppenderRef ref="appLog" />
-            <AppenderRef ref="Console" />
+            <AppenderRef ref="appLog"/>
+            <AppenderRef ref="Console"/>
         </Logger>
         <Root level="debug">
-            <AppenderRef ref="Console" />
-            <AppenderRef ref="appLog" />
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="appLog"/>
         </Root>
     </Loggers>
 </Configuration>

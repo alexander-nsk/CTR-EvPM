@@ -8,8 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Repository interface for managing ViewEntity instance
@@ -27,7 +26,7 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
     @Query("SELECT COUNT(v) FROM ViewEntity v " +
             "WHERE DATE(v.regTime) >= :startDate AND DATE(v.regTime) <= :endDate AND v.mmDma = :mmDma " +
             "GROUP BY DATE(v.regTime)")
-    List<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate, int mmDma);
+    Stream<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate, int mmDma);
 
     /**
      * Retrieves the number of views for a given siteId within the specified date range.
@@ -40,7 +39,7 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
     @Query("SELECT COUNT(v) FROM ViewEntity v " +
             "WHERE DATE(v.regTime) >= :startDate AND DATE(v.regTime) <= :endDate AND v.siteId = :siteId " +
             "GROUP BY DATE(v.regTime)")
-    List<Integer> getNumSiteIdByDates(LocalDate startDate, LocalDate endDate, String siteId);
+    Stream<Integer> getNumSiteIdByDates(LocalDate startDate, LocalDate endDate, String siteId);
 
     /**
      * Retrieves the CTR for MmDma.
@@ -53,7 +52,7 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
             "FULL JOIN ActionEntity ae ON (ve.uid = ae.viewEntity.uid AND (ae.tag = 'fclick' OR NOT (ae.tag LIKE 'v%'))) " +
             "WHERE ve.mmDma IS NOT NULL " +
             "GROUP BY ve.mmDma")
-    List<MmDmaCTR> getMmDmaCTR();
+    Stream<MmDmaCTR> getMmDmaCTR();
 
     /**
      * Retrieves the CTR for MmDma with a specific tag.
@@ -67,7 +66,7 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
             "FULL JOIN ActionEntity ae ON (ve.uid = ae.viewEntity.uid AND (ae.tag = :tag OR ae.tag = CONCAT('v', :tag))) " +
             "WHERE ve.mmDma IS NOT NULL " +
             "GROUP BY ve.mmDma")
-    List<MmDmaCTR> getMmDmaCTR(String tag);
+    Stream<MmDmaCTR> getMmDmaCTR(String tag);
 
     /**
      * Retrieves the CTR for SiteId.
@@ -80,7 +79,7 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
             "FULL JOIN ActionEntity ae ON (ve.uid = ae.viewEntity.uid AND (ae.tag = 'fclick' OR NOT (ae.tag LIKE 'v%'))) " +
             "WHERE ve.siteId IS NOT NULL " +
             "GROUP BY ve.siteId")
-    List<SiteIdCTR> getSiteIdCTR();
+    Stream<SiteIdCTR> getSiteIdCTR();
 
     /**
      * Retrieves the CTR for SiteId with a specific tag.
@@ -94,5 +93,5 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
             "FULL JOIN ActionEntity ae ON (ve.uid = ae.viewEntity.uid AND (ae.tag = :tag OR ae.tag = CONCAT('v', :tag))) " +
             "WHERE ve.siteId IS NOT NULL " +
             "GROUP BY ve.siteId")
-    List<SiteIdCTR> getSiteIdCTR(String tag);
+    Stream<SiteIdCTR> getSiteIdCTR(String tag);
 }

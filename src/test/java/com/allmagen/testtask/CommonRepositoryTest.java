@@ -4,7 +4,6 @@ import com.allmagen.testtask.model.ActionEntity;
 import com.allmagen.testtask.model.ViewEntity;
 import com.allmagen.testtask.repository.ActionRepository;
 import com.allmagen.testtask.repository.ViewRepository;
-import jakarta.transaction.Transactional;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -35,7 +33,6 @@ public class CommonRepositoryTest {
             .withPassword("mypass");
 
     @Test
-    @Transactional
     public void givenViewsInDB_WhenCheckViewsNumber() {
         viewRepository.save(new ViewEntity("1"));
         viewRepository.save(new ViewEntity("2"));
@@ -46,7 +43,6 @@ public class CommonRepositoryTest {
     }
 
     @Test
-    @Transactional
     public void givenActionsInDB_WhenCheckActionsNumber() {
         viewRepository.save(new ViewEntity("1"));
         viewRepository.save(new ViewEntity("2"));
