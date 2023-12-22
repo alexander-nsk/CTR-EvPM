@@ -47,11 +47,12 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
      * @return A list of MmDmaCTR representing the MmDma and CTR pairs.
      */
     @Query("SELECT ve.mmDma AS mmDma, " +
+            "ve.regTime AS regTime, " +
             "SUM(COALESCE(ae.count, 0)) * 1.0 / COUNT(DISTINCT ve.uid) AS ctr " +
             "FROM ViewEntity ve " +
-            "FULL JOIN ActionEntity ae ON (ve.uid = ae.viewEntity.uid AND (ae.tag = 'fclick' OR NOT (ae.tag LIKE 'v%'))) " +
+            "LEFT JOIN ActionEntity ae ON (ve.uid = ae.viewEntity.uid AND (ae.tag = 'fclick' OR NOT (ae.tag LIKE 'v%'))) " +
             "WHERE ve.mmDma IS NOT NULL " +
-            "GROUP BY ve.mmDma")
+            "GROUP BY ve.mmDma, ve.regTime")
     Stream<MmDmaCTR> getMmDmaCTR();
 
     /**
