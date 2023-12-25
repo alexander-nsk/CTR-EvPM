@@ -12,11 +12,15 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Controller
@@ -100,6 +104,25 @@ public class StatisticsController {
         return ResponseEntity.ok(new StreamResponse<>(pairList));
     }
 
+    @Operation(summary = "Get Click-Through Rate (CTR) for MmDma with Tag in a Date Range")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Array of MmDma and CTR pairs with a specific tag")
+    })
+    @GetMapping(value = "/views/ctrByMmDmaByTagAndDateRange", produces = {"application/json"})
+    public ResponseEntity<StreamResponse<MmDmaCTR>> getMmDmaCTRByTagAndDateRange(
+            @Parameter(description = "Tag") String tag,
+            @Parameter(description = "Start date for the date range", required = true)
+            @RequestParam(value = "startDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime startDate,
+            @Parameter(description = "End date for the date range", required = true)
+            @RequestParam(value = "endDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime endDate,
+            @Parameter(description = "Interval in seconds for time granularity") int intervalInSeconds) {
+        Stream<MmDmaCTR> ctrPairs = statisticsService.getMmDmaCTR(tag, startDate, endDate, intervalInSeconds);
+        return ResponseEntity.ok(new StreamResponse<>(ctrPairs));
+    }
+
+
     @Operation(summary = "CTR for SiteId")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of siteId and CTR pairs")})
     @GetMapping(value = "/views/ctrBySiteId", produces = {"application/json"})
@@ -118,5 +141,25 @@ public class StatisticsController {
 
     public record StreamResponse<T>(Stream<T> items) {
 
+    }
+
+    @GetMapping("/chartForCtrAndMmDma")
+    public String generateBarChartForCtrAndMmDma(Model model) {
+        Stream<MmDmaCTR> mmDmaCtrStream = statisticsService.getMmDmaCTR();
+
+        List<MmDmaCTR> mmDmaCtrList = mmDmaCtrStream.toList();
+
+        List<Float> ctrValues = mmDmaCtrList.stream()
+                .map(MmDmaCTR::getCtr)
+                .toList();
+
+        List<Integer> mmDmaValues = IntStream.rangeClosed(0, 107)
+                .boxed()
+                .toList();
+
+        model.addAttribute("mmDma", mmDmaValues);
+        model.addAttribute("ctr", ctrValues);
+
+        return "barChart";
     }
 }
