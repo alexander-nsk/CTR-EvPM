@@ -9,19 +9,15 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 @Controller
@@ -104,6 +100,25 @@ public class StatisticsController {
         Stream<MmDmaCTR> pairList = statisticsService.getMmDmaCTR(tag);
         return ResponseEntity.ok(new StreamResponse<>(pairList));
     }
+
+    @Operation(summary = "Get Click-Through Rate (CTR) for MmDma with Tag in a Date Range")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Array of MmDma and CTR pairs with a specific tag")
+    })
+    @GetMapping(value = "/views/ctrByMmDmaByTagAndDateRange", produces = {"application/json"})
+    public ResponseEntity<StreamResponse<MmDmaCTR>> getMmDmaCTRByTagAndDateRange(
+            @Parameter(description = "Tag") String tag,
+            @Parameter(description = "Start date for the date range", required = true)
+            @RequestParam(value = "startDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime startDate,
+            @Parameter(description = "End date for the date range", required = true)
+            @RequestParam(value = "endDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime endDate,
+            @Parameter(description = "Interval in seconds for time granularity") int intervalInSeconds) {
+        Stream<MmDmaCTR> ctrPairs = statisticsService.getMmDmaCTR(tag, startDate, endDate, intervalInSeconds);
+        return ResponseEntity.ok(new StreamResponse<>(ctrPairs));
+    }
+
 
     @Operation(summary = "CTR for SiteId")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of siteId and CTR pairs")})

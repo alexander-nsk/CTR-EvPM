@@ -247,6 +247,16 @@ public class StatisticsService {
     }
 
     /**
+     * Retrieves the CTR for MmDma.
+     *
+     * @return A list of MmDmaCTR representing the MmDma and CTR pairs.
+     */
+    @Transactional
+    public Stream<MmDmaCTR> getMmDmaCTR(String tag, LocalDateTime startDate, LocalDateTime endDate, int intervalInSeconds) {
+        return viewRepository.getMmDmaCTR(tag, startDate, endDate, intervalInSeconds);
+    }
+
+    /**
      * Retrieves the CTR for SiteId with a specific tag.
      *
      * @param tag The tag to filter the results.

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 /**
@@ -47,12 +48,11 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
      * @return A list of MmDmaCTR representing the MmDma and CTR pairs.
      */
     @Query("SELECT ve.mmDma AS mmDma, " +
-            "ve.regTime AS regTime, " +
             "SUM(COALESCE(ae.count, 0)) * 1.0 / COUNT(DISTINCT ve.uid) AS ctr " +
             "FROM ViewEntity ve " +
             "LEFT JOIN ActionEntity ae ON (ve.uid = ae.viewEntity.uid AND (ae.tag = 'fclick' OR NOT (ae.tag LIKE 'v%'))) " +
             "WHERE ve.mmDma IS NOT NULL " +
-            "GROUP BY ve.mmDma, ve.regTime")
+            "GROUP BY ve.mmDma")
     Stream<MmDmaCTR> getMmDmaCTR();
 
     /**
@@ -68,6 +68,16 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
             "WHERE ve.mmDma IS NOT NULL " +
             "GROUP BY ve.mmDma")
     Stream<MmDmaCTR> getMmDmaCTR(String tag);
+
+    @Query("SELECT ve.mmDma AS mmDma, " +
+            "SUM(COALESCE(ae.count, 0)) * 1.0 / COUNT(DISTINCT ve.uid) AS ctr " +
+            "FROM ViewEntity ve " +
+            "FULL JOIN ActionEntity ae ON (ve.uid = ae.viewEntity.uid AND (ae.tag = :tag OR ae.tag = CONCAT('v', :tag))) " +
+            "WHERE ve.mmDma IS NOT NULL " +
+            "AND ve.regTime BETWEEN :startDate AND :endDate " +
+            "AND CAST(TIMESTAMPDIFF(SECOND, ve.regTime, :endDate) AS INTEGER) % :intervalInSeconds = 0 " +
+            "GROUP BY ve.mmDma")
+    Stream<MmDmaCTR> getMmDmaCTR(String tag, LocalDateTime startDate, LocalDateTime endDate, int intervalInSeconds);
 
     /**
      * Retrieves the CTR for SiteId.
