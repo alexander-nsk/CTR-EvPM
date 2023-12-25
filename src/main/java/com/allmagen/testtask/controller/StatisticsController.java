@@ -12,12 +12,15 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Controller
@@ -138,5 +141,25 @@ public class StatisticsController {
 
     public record StreamResponse<T>(Stream<T> items) {
 
+    }
+
+    @GetMapping("/chartForCtrAndMmDma")
+    public String generateBarChartForCtrAndMmDma(Model model) {
+        Stream<MmDmaCTR> mmDmaCtrStream = statisticsService.getMmDmaCTR();
+
+        List<MmDmaCTR> mmDmaCtrList = mmDmaCtrStream.toList();
+
+        List<Float> ctrValues = mmDmaCtrList.stream()
+                .map(MmDmaCTR::getCtr)
+                .toList();
+
+        List<Integer> mmDmaValues = IntStream.rangeClosed(0, 107)
+                .boxed()
+                .toList();
+
+        model.addAttribute("mmDma", mmDmaValues);
+        model.addAttribute("ctr", ctrValues);
+
+        return "barChart";
     }
 }
