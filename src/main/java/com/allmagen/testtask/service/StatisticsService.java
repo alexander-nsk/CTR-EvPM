@@ -3,6 +3,7 @@ package com.allmagen.testtask.service;
 import com.allmagen.testtask.model.ActionEntity;
 import com.allmagen.testtask.model.ViewEntity;
 import com.allmagen.testtask.model.metrics.MmDmaCTR;
+import com.allmagen.testtask.model.metrics.MmDmaCTRByDates;
 import com.allmagen.testtask.model.metrics.SiteIdCTR;
 import com.allmagen.testtask.repository.ActionRepository;
 import com.allmagen.testtask.repository.ViewRepository;
@@ -246,14 +247,9 @@ public class StatisticsService {
         return viewRepository.getMmDmaCTR();
     }
 
-    /**
-     * Retrieves the CTR for MmDma.
-     *
-     * @return A list of MmDmaCTR representing the MmDma and CTR pairs.
-     */
     @Transactional
-    public Stream<MmDmaCTR> getMmDmaCTR(String tag, LocalDateTime startDate, LocalDateTime endDate, int intervalInSeconds) {
-        return viewRepository.getMmDmaCTR(tag, startDate, endDate, intervalInSeconds);
+    public Stream<MmDmaCTRByDates> getMmDmaCTR(LocalDateTime startDate, LocalDateTime endDate) {
+        return viewRepository.getMmDmaCTR(startDate, endDate);
     }
 
     /**

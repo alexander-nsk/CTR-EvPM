@@ -2,6 +2,7 @@ package com.allmagen.testtask.repository;
 
 import com.allmagen.testtask.model.ViewEntity;
 import com.allmagen.testtask.model.metrics.MmDmaCTR;
+import com.allmagen.testtask.model.metrics.MmDmaCTRByDates;
 import com.allmagen.testtask.model.metrics.SiteIdCTR;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -69,16 +71,6 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
             "GROUP BY ve.mmDma")
     Stream<MmDmaCTR> getMmDmaCTR(String tag);
 
-    @Query("SELECT ve.mmDma AS mmDma, " +
-            "SUM(COALESCE(ae.count, 0)) * 1.0 / COUNT(DISTINCT ve.uid) AS ctr " +
-            "FROM ViewEntity ve " +
-            "FULL JOIN ActionEntity ae ON (ve.uid = ae.viewEntity.uid AND (ae.tag = :tag OR ae.tag = CONCAT('v', :tag))) " +
-            "WHERE ve.mmDma IS NOT NULL " +
-            "AND ve.regTime BETWEEN :startDate AND :endDate " +
-            "AND CAST(TIMESTAMPDIFF(SECOND, ve.regTime, :endDate) AS INTEGER) % :intervalInSeconds = 0 " +
-            "GROUP BY ve.mmDma")
-    Stream<MmDmaCTR> getMmDmaCTR(String tag, LocalDateTime startDate, LocalDateTime endDate, int intervalInSeconds);
-
     /**
      * Retrieves the CTR for SiteId.
      *
@@ -105,4 +97,20 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
             "WHERE ve.siteId IS NOT NULL " +
             "GROUP BY ve.siteId")
     Stream<SiteIdCTR> getSiteIdCTR(String tag);
+
+    @Query("SELECT FUNCTION('DATE_TRUNC', 'hour', v.regTime) AS intervalStart, " +
+            "SUM(COALESCE(a.count, 0)) * 1.0 / COUNT(DISTINCT v.uid) AS ctr " +
+            "FROM " +
+            "   ViewEntity v " +
+            "FULL JOIN " +
+            "   ActionEntity a ON v.uid = a.viewEntity.uid " +
+            "WHERE " +
+            "   v.regTime BETWEEN :startDate AND :endDate " +
+            "GROUP BY " +
+            "   FUNCTION('DATE_TRUNC', 'hour', v.regTime) " +
+            "ORDER BY " +
+            "   FUNCTION('DATE_TRUNC', 'hour', v.regTime)")
+    Stream<MmDmaCTRByDates> getMmDmaCTR(
+            LocalDateTime startDate,
+            LocalDateTime endDate);
 }

@@ -1,6 +1,7 @@
 package com.allmagen.testtask.controller;
 
 import com.allmagen.testtask.model.metrics.MmDmaCTR;
+import com.allmagen.testtask.model.metrics.MmDmaCTRByDates;
 import com.allmagen.testtask.model.metrics.SiteIdCTR;
 import com.allmagen.testtask.service.StatisticsService;
 import com.opencsv.exceptions.CsvValidationException;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -104,25 +106,6 @@ public class StatisticsController {
         return ResponseEntity.ok(new StreamResponse<>(pairList));
     }
 
-    @Operation(summary = "Get Click-Through Rate (CTR) for MmDma with Tag in a Date Range")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Array of MmDma and CTR pairs with a specific tag")
-    })
-    @GetMapping(value = "/views/ctrByMmDmaByTagAndDateRange", produces = {"application/json"})
-    public ResponseEntity<StreamResponse<MmDmaCTR>> getMmDmaCTRByTagAndDateRange(
-            @Parameter(description = "Tag") String tag,
-            @Parameter(description = "Start date for the date range", required = true)
-            @RequestParam(value = "startDate")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime startDate,
-            @Parameter(description = "End date for the date range", required = true)
-            @RequestParam(value = "endDate")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime endDate,
-            @Parameter(description = "Interval in seconds for time granularity") int intervalInSeconds) {
-        Stream<MmDmaCTR> ctrPairs = statisticsService.getMmDmaCTR(tag, startDate, endDate, intervalInSeconds);
-        return ResponseEntity.ok(new StreamResponse<>(ctrPairs));
-    }
-
-
     @Operation(summary = "CTR for SiteId")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of siteId and CTR pairs")})
     @GetMapping(value = "/views/ctrBySiteId", produces = {"application/json"})
@@ -137,6 +120,33 @@ public class StatisticsController {
     public ResponseEntity<StreamResponse<SiteIdCTR>> getSiteIdCTRByTag(@Parameter(description = "Tag") String tag) {
         Stream<SiteIdCTR> pairList = statisticsService.getSiteIdCTR(tag);
         return ResponseEntity.ok(new StreamResponse<>(pairList));
+    }
+
+    @Operation(summary = "Get Click-Through Rate (CTR) for MmDma within Date Range and Tag")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of MmDma and CTR pairs with a specific tag")})
+    @GetMapping("/views/ctr-by-dates")
+    public String getMmDmaCTRByDates(@Parameter(description = "Date from", required = true)
+                                     @RequestParam(value = "dateFrom")
+                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateFrom,
+                                     @Parameter(description = "Date to", required = true)
+                                     @RequestParam(value = "dateTo")
+                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateTo,
+                                     Model model) {
+        List<LocalDateTime> intervalStarts = new ArrayList<>();
+        List<Float> ctrValues = new ArrayList<>();
+
+        Stream<MmDmaCTRByDates> resultStream = statisticsService.getMmDmaCTR(dateFrom, dateTo);
+
+        resultStream.forEach(mmDmaCTR -> {
+            intervalStarts.add(mmDmaCTR.getIntervalStart());
+            ctrValues.add(mmDmaCTR.getCtr());
+        });
+
+        model.addAttribute("graphTitle", "CTR Graph from " + dateFrom + " to " + dateTo);
+        model.addAttribute("yAxisTitle", "CTR");
+        model.addAttribute("xAxisData", intervalStarts);
+        model.addAttribute("yAxisData", ctrValues);
+        return "barChart";
     }
 
     public record StreamResponse<T>(Stream<T> items) {

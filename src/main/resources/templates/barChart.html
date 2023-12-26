@@ -13,7 +13,7 @@
 </head>
 <body>
 	<div class="container">
-		<h2 align="center">Data Graph</h2>
+		<h2 align="center">[[${graphTitle}]]</h2>
 
 		<div id="container"
 			style="width: 1100px; height: 800px; margin: 0 auto"></div>
@@ -38,14 +38,13 @@
             text: ''
         },
         xAxis: {
-            categories: [[${mmDma}]],
+            categories: [[${xAxisData}]],
             crosshair: true
         },
         yAxis: {
             min: 0,
-            max:2,
             title: {
-                text: 'CTR'
+                text: [[${yAxisTitle}]]
             }
         },
         tooltip: {
@@ -63,8 +62,8 @@
             }
         },
         series: [{
-            name: 'CTR (MmDma)',
-            data: [[${ctr}]]
+            name: [[${yAxisTitle}]],
+            data: [[${yAxisData}]]
         }]
       });
     });

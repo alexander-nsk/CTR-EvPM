@@ -8,9 +8,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@OpenAPIDefinition(
-        info = @Info(title = "Allmagen", version = "0.0.1", description = "API Documentation.")
-)
+@OpenAPIDefinition(info = @Info(title = "Allmagen", version = "0.0.1", description = "API Documentation."))
 @SpringBootApplication
 @EnableTransactionManagement
 public class TestTaskApplication implements WebMvcConfigurer {
