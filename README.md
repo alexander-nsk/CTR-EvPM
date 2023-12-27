@@ -70,7 +70,25 @@ This document provides an information about the API for the interaction between 
 - Upload Views File:
 ![img.png](img.png)
 
-## cURL Example
-### Upload Views Data from CSV
-```bash
-curl -X POST -H "Content-Type: multipart/form-data" -F "file=@interview.x.small.csv" http://localhost:8080/views
+# Get Click-Through Rate (CTR) for MmDma within Date Range and Tag
+
+## Description
+This endpoint retrieves the Click-Through Rate (CTR) for a specified MmDma within a given date range.
+
+## Endpoint
+`GET /views/ctr-by-dates`
+
+## Request Parameters
+- **dateFrom** (required): The starting date and time of the date range. Format: 'yyyy-MM-ddTHH:mm:ss'
+- **dateTo** (required): The ending date and time of the date range. Format: 'yyyy-MM-ddTHH:mm:ss'
+
+## Responses
+- **200 OK**
+    - Description: Array of MmDma and CTR pairs with a specific tag.
+
+## Example
+```http
+GET /views/ctr-by-dates?dateFrom=2021-07-20T20:00:00&dateTo=2021-07-30T23:59:59
+```
+
+![img_1.png](img_1.png)
