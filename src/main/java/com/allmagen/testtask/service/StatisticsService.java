@@ -1,10 +1,12 @@
 package com.allmagen.testtask.service;
 
+import com.allmagen.testtask.controller.StatisticsController;
 import com.allmagen.testtask.model.ActionEntity;
 import com.allmagen.testtask.model.ViewEntity;
 import com.allmagen.testtask.model.metrics.MmDmaCTR;
 import com.allmagen.testtask.model.metrics.MmDmaCTRByDates;
-import com.allmagen.testtask.model.metrics.SiteIdCTR;
+import com.allmagen.testtask.model.metrics.MmDmaCount;
+import com.allmagen.testtask.model.metrics.SiteIdCount;
 import com.allmagen.testtask.repository.ActionRepository;
 import com.allmagen.testtask.repository.ViewRepository;
 import com.opencsv.CSVReader;
@@ -25,7 +27,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -189,7 +190,7 @@ public class StatisticsService {
                         action.setCount(entry.getValue());
                         return action;
                     })
-                    .collect(Collectors.toList());
+                    .toList();
 
             actionRepository.saveAll(actionEntities);
 
@@ -200,77 +201,35 @@ public class StatisticsService {
         }
     }
 
-    /**
-     * Retrieves the number of views for a given mmDma within the specified date range.
-     *
-     * @param startDate The start date of the date range.
-     * @param endDate   The end date of the date range.
-     * @param mmDma     The mmDma for which to calculate the number of views.
-     * @return A list of integers representing the number of views for the given mmDma and dates.
-     */
-    @Transactional
-    public Stream<Integer> getNumMmaByDates(LocalDate startDate, LocalDate endDate, int mmDma) {
-        return viewRepository.getNumMmaByDates(startDate, endDate, mmDma);
-    }
 
-    /**
-     * Retrieves the number of views for a given siteId within the specified date range.
-     *
-     * @param startDate The start date of the date range.
-     * @param endDate   The end date of the date range.
-     * @param siteId    The siteId for which to calculate the number of views.
-     * @return A list of integers representing the number of views for the given siteId and dates.
-     */
     @Transactional
-    public Stream<Integer> getNumSiteIdByDates(LocalDate startDate, LocalDate endDate, String siteId) {
-        return viewRepository.getNumSiteIdByDates(startDate, endDate, siteId);
-    }
-
-    /**
-     * Retrieves the CTR for MmDma with a specific tag.
-     *
-     * @param tag The tag to filter the results.
-     * @return A list of  MmDmaCTR representing the MmDma and CTR pairs with the specified tag.
-     */
-    @Transactional
-    public Stream<MmDmaCTR> getMmDmaCTR(String tag) {
-        return viewRepository.getMmDmaCTR(tag);
-    }
-
-    /**
-     * Retrieves the CTR for MmDma.
-     *
-     * @return A list of MmDmaCTR representing the MmDma and CTR pairs.
-     */
-    @Transactional
-    public Stream<MmDmaCTR> getMmDmaCTR() {
-        return viewRepository.getMmDmaCTR();
+    public Stream<MmDmaCTRByDates> getCTR(LocalDateTime startDate, LocalDateTime endDate, StatisticsController.Interval interval, String tag) {
+        return viewRepository.getCTR(startDate, endDate, interval.getValue(), tag);
     }
 
     @Transactional
-    public Stream<MmDmaCTRByDates> getMmDmaCTR(LocalDateTime startDate, LocalDateTime endDate) {
-        return viewRepository.getMmDmaCTR(startDate, endDate);
+    public Stream<MmDmaCTRByDates> getEvPM(LocalDateTime startDate, LocalDateTime endDate, StatisticsController.Interval interval, String tag) {
+        return viewRepository.getEvPM(startDate, endDate, interval.getValue(), tag);
     }
 
-    /**
-     * Retrieves the CTR for SiteId with a specific tag.
-     *
-     * @param tag The tag to filter the results.
-     * @return A list of SiteIdCTR representing the SiteId and CTR pairs with the specified tag.
-     */
     @Transactional
-    public Stream<SiteIdCTR> getSiteIdCTR(String tag) {
-        return viewRepository.getSiteIdCTR(tag);
+    public Stream<MmDmaCount> getViewsCountByMmDma(LocalDate startDate, LocalDate endDate) {
+        return viewRepository.getViewsCountByMmDma(startDate, endDate);
     }
 
-    /**
-     * Retrieves the CTR for SiteId.
-     *
-     * @return A list of SiteIdCTR representing the SiteId and CTR pairs.
-     */
     @Transactional
-    public Stream<SiteIdCTR> getSiteIdCTR() {
-        return viewRepository.getSiteIdCTR();
+    public Stream<SiteIdCount> getViewsCountBySiteId(LocalDate startDate, LocalDate endDate) {
+        return viewRepository.getViewsCountBySiteId(startDate, endDate);
+    }
+
+    @Transactional
+    public Stream<MmDmaCTR> getCtrAggregateByMmDma(LocalDateTime startDate, LocalDateTime endDate, String tag) {
+        return viewRepository.getCtrAggregateByMmDma(startDate, endDate, tag);
+    }
+
+    @Transactional
+    public Stream<MmDmaCTR> getCtrAggregateBySiteId(LocalDateTime startDate, LocalDateTime endDate, String tag) {
+        return viewRepository.getCtrAggregateBySiteId(startDate, endDate, tag);
     }
 
     /**

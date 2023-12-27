@@ -2,11 +2,14 @@ package com.allmagen.testtask.controller;
 
 import com.allmagen.testtask.model.metrics.MmDmaCTR;
 import com.allmagen.testtask.model.metrics.MmDmaCTRByDates;
-import com.allmagen.testtask.model.metrics.SiteIdCTR;
+import com.allmagen.testtask.model.metrics.MmDmaCount;
+import com.allmagen.testtask.model.metrics.SiteIdCount;
 import com.allmagen.testtask.service.StatisticsService;
 import com.opencsv.exceptions.CsvValidationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,7 +25,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Controller
@@ -54,86 +56,22 @@ public class StatisticsController {
         return ResponseEntity.ok("Actions uploaded: " + actionsNumber);
     }
 
-    @Operation(summary = "Calculate number of views for given mmDma and dates")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Number of views calculated for mmDma")})
-    @GetMapping(value = "/views/allByMmDma", produces = {"application/json"})
-    public ResponseEntity<StreamResponse<Integer>> getNumMmaByDates(
-            @Parameter(description = "Date from", required = true)
-            @RequestParam(value = "dateFrom")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateFrom,
-            @Parameter(description = "Date to", required = true)
-            @RequestParam(value = "dateTo")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateTo,
-            @Parameter(description = "mmDma", required = true) @RequestParam(value = "mmDma") int mmDma) {
-
-        Stream<Integer> mmDmaNums = statisticsService.getNumMmaByDates(dateFrom, dateTo, mmDma);
-
-        return ResponseEntity.ok(new StreamResponse<>(mmDmaNums));
-    }
-
-    @Operation(summary = "Calculate number of views for given siteId and dates")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Number of views calculated for siteId")})
-    @GetMapping(value = "/views/allBySiteId", produces = {"application/json"})
-    public ResponseEntity<StreamResponse<Integer>> getSiteIdNumsByDates(
-            @Parameter(description = "Date from", required = true)
-            @RequestParam(value = "dateFrom")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateFrom,
-            @Parameter(description = "Date to", required = true)
-            @RequestParam(value = "dateTo")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateTo,
-            @Parameter(description = "siteId", required = true) @RequestParam(value = "siteId") String siteId) {
-
-        Stream<Integer> siteIdNums = statisticsService.getNumSiteIdByDates(dateFrom, dateTo, siteId);
-
-        return ResponseEntity.ok(new StreamResponse<>(siteIdNums));
-    }
-
-    @Operation(summary = "CTR for MmDma")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of mmDma and CTR pairs")})
-    @GetMapping(value = "/views/ctrByMmDma", produces = {"application/json"})
-    public ResponseEntity<StreamResponse<MmDmaCTR>> getMmDmaCTR() {
-        Stream<MmDmaCTR> pairList = statisticsService.getMmDmaCTR();
-        return ResponseEntity.ok(new StreamResponse<>(pairList));
-    }
-
-    @Operation(summary = "CTR for MmDma with Tag")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of mmDma and CTR pairs with a specific tag")})
-    @GetMapping(value = "/views/ctrByMmDmaByTag", produces = {"application/json"})
-    public ResponseEntity<StreamResponse<MmDmaCTR>> getMmDmaCTRByTag(@Parameter(description = "Tag") String tag) {
-        Stream<MmDmaCTR> pairList = statisticsService.getMmDmaCTR(tag);
-        return ResponseEntity.ok(new StreamResponse<>(pairList));
-    }
-
-    @Operation(summary = "CTR for SiteId")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of siteId and CTR pairs")})
-    @GetMapping(value = "/views/ctrBySiteId", produces = {"application/json"})
-    public ResponseEntity<StreamResponse<SiteIdCTR>> getSiteIdCTR() {
-        Stream<SiteIdCTR> pairList = statisticsService.getSiteIdCTR();
-        return ResponseEntity.ok(new StreamResponse<>(pairList));
-    }
-
-    @Operation(summary = "CTR for SiteId with Tag")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of siteId and CTR pairs with a specific tag")})
-    @GetMapping(value = "/views/ctrBySiteIdByTag", produces = {"application/json"})
-    public ResponseEntity<StreamResponse<SiteIdCTR>> getSiteIdCTRByTag(@Parameter(description = "Tag") String tag) {
-        Stream<SiteIdCTR> pairList = statisticsService.getSiteIdCTR(tag);
-        return ResponseEntity.ok(new StreamResponse<>(pairList));
-    }
-
-    @Operation(summary = "Get Click-Through Rate (CTR) for MmDma within Date Range and Tag")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of MmDma and CTR pairs with a specific tag")})
-    @GetMapping("/views/ctr-by-dates")
-    public String getMmDmaCTRByDates(@Parameter(description = "Date from", required = true)
-                                     @RequestParam(value = "dateFrom")
-                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateFrom,
-                                     @Parameter(description = "Date to", required = true)
-                                     @RequestParam(value = "dateTo")
-                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateTo,
-                                     Model model) {
+    @Operation(summary = "Get CTR within Date Range and Tag")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of CTR pairs with a specific Date Range")})
+    @GetMapping("/ctr")
+    public String getCTR(@Parameter(description = "Date from", required = true)
+                         @RequestParam(value = "dateFrom")
+                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateFrom,
+                         @Parameter(description = "Date to", required = true)
+                         @RequestParam(value = "dateTo")
+                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateTo,
+                         @Parameter(in = ParameterIn.QUERY, name = "interval", schema = @Schema(implementation = Interval.class), required = true) Interval interval,
+                         @Parameter(description = "tag") @RequestParam(value = "tag", required = false) String tag,
+                         Model model) {
         List<LocalDateTime> intervalStarts = new ArrayList<>();
         List<Float> ctrValues = new ArrayList<>();
 
-        Stream<MmDmaCTRByDates> resultStream = statisticsService.getMmDmaCTR(dateFrom, dateTo);
+        Stream<MmDmaCTRByDates> resultStream = statisticsService.getCTR(dateFrom, dateTo, interval, tag);
 
         resultStream.forEach(mmDmaCTR -> {
             intervalStarts.add(mmDmaCTR.getIntervalStart());
@@ -147,27 +85,140 @@ public class StatisticsController {
         return "barChart";
     }
 
+    @Operation(summary = "Get EvPM within Date Range and Tag")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of EvPM pairs with a specific Date Range")})
+    @GetMapping("/evpm")
+    public String getEvPM(@Parameter(description = "Date from", required = true)
+                          @RequestParam(value = "dateFrom")
+                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateFrom,
+                          @Parameter(description = "Date to", required = true)
+                          @RequestParam(value = "dateTo")
+                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateTo,
+                          @Parameter(in = ParameterIn.QUERY, name = "interval", schema = @Schema(implementation = Interval.class), required = true) Interval interval,
+                          @Parameter(description = "tag") @RequestParam(value = "tag", required = false) String tag,
+                          Model model) {
+        List<LocalDateTime> intervalStarts = new ArrayList<>();
+        List<Float> ctrValues = new ArrayList<>();
+
+        Stream<MmDmaCTRByDates> resultStream = statisticsService.getEvPM(dateFrom, dateTo, interval, tag);
+
+        resultStream.forEach(mmDmaCTR -> {
+            intervalStarts.add(mmDmaCTR.getIntervalStart());
+            ctrValues.add(mmDmaCTR.getCtr());
+        });
+
+        model.addAttribute("graphTitle", "EvPM Graph from " + dateFrom + " to " + dateTo);
+        model.addAttribute("yAxisTitle", "EvPM");
+        model.addAttribute("xAxisData", intervalStarts);
+        model.addAttribute("yAxisData", ctrValues);
+        return "barChart";
+    }
+
+    @Operation(summary = "Aggregate number of views by mmDma for given dates")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Number of views aggregated by mmDma")})
+    @GetMapping(value = "/viewsCountByMmDma", produces = {"application/json"})
+    public ResponseEntity<StreamResponse<MmDmaCount>> getViewsCountByMmDma(
+            @Parameter(description = "Date from", required = true)
+            @RequestParam(value = "dateFrom")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateFrom,
+            @Parameter(description = "Date to", required = true)
+            @RequestParam(value = "dateTo")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateTo) {
+
+        Stream<MmDmaCount> viewsCounts = statisticsService.getViewsCountByMmDma(dateFrom, dateTo);
+
+        return ResponseEntity.ok(new StreamResponse<>(viewsCounts));
+    }
+
+    @Operation(summary = "Aggregate number of views by siteId for given dates")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Number of views aggregated by siteId")})
+    @GetMapping(value = "/viewsCountBySiteId", produces = {"application/json"})
+    public ResponseEntity<StreamResponse<SiteIdCount>> getViewsCountBySiteId(
+            @Parameter(description = "Date from", required = true)
+            @RequestParam(value = "dateFrom")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateFrom,
+            @Parameter(description = "Date to", required = true)
+            @RequestParam(value = "dateTo")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) final LocalDate dateTo) {
+
+        Stream<SiteIdCount> viewsCounts = statisticsService.getViewsCountBySiteId(dateFrom, dateTo);
+
+        return ResponseEntity.ok(new StreamResponse<>(viewsCounts));
+    }
+
+    @Operation(summary = "Get CtrAggregateByMmDma within Date Range and Tag")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of Ctr Aggregate By MmDma pairs with a specific Date Range")})
+    @GetMapping("/ctrByMmDma")
+    public String getCtrAggregateByMmDma(@Parameter(description = "Date from", required = true)
+                                         @RequestParam(value = "dateFrom")
+                                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateFrom,
+                                         @Parameter(description = "Date to", required = true)
+                                         @RequestParam(value = "dateTo")
+                                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateTo,
+                                         @Parameter(description = "tag") @RequestParam(value = "tag", required = false) String tag,
+                                         Model model) {
+        List<Integer> mmDmas = new ArrayList<>();
+        List<Float> ctrValues = new ArrayList<>();
+
+        Stream<MmDmaCTR> resultStream = statisticsService.getCtrAggregateByMmDma(dateFrom, dateTo, tag);
+
+        resultStream.forEach(mmDmaCTR -> {
+            mmDmas.add(mmDmaCTR.getMmDma());
+            ctrValues.add(mmDmaCTR.getCtr());
+        });
+
+        model.addAttribute("graphTitle", "Ctr Aggregate By MmDma Graph from " + dateFrom + " to " + dateTo);
+        model.addAttribute("yAxisTitle", "CtrAggregateByMmDma");
+        model.addAttribute("xAxisData", mmDmas);
+        model.addAttribute("yAxisData", ctrValues);
+        return "barChart";
+    }
+
+    @Operation(summary = "Get Ctr Aggregate By SiteId within Date Range and Tag")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Array of Ctr Aggregate By SiteId pairs with a specific Date Range")})
+    @GetMapping("/ctrBySiteId")
+    public String getCtrAggregateBySiteId(@Parameter(description = "Date from", required = true)
+                                          @RequestParam(value = "dateFrom")
+                                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateFrom,
+                                          @Parameter(description = "Date to", required = true)
+                                          @RequestParam(value = "dateTo")
+                                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final LocalDateTime dateTo,
+                                          @Parameter(description = "tag") @RequestParam(value = "tag", required = false) String tag,
+                                          Model model) {
+        List<Integer> x = new ArrayList<>();
+        List<Float> y = new ArrayList<>();
+
+        Stream<MmDmaCTR> resultStream = statisticsService.getCtrAggregateBySiteId(dateFrom, dateTo, tag);
+
+        resultStream.forEach(mmDmaCTR -> {
+            x.add(mmDmaCTR.getMmDma());
+            y.add(mmDmaCTR.getCtr());
+        });
+
+        model.addAttribute("graphTitle", "Ctr Aggregate By SiteId Graph from " + dateFrom + " to " + dateTo);
+        model.addAttribute("yAxisTitle", "CtrAggregateBySiteId");
+        model.addAttribute("xAxisData", x);
+        model.addAttribute("yAxisData", y);
+        return "barChart";
+    }
+
     public record StreamResponse<T>(Stream<T> items) {
 
     }
 
-    @GetMapping("/chartForCtrAndMmDma")
-    public String generateBarChartForCtrAndMmDma(Model model) {
-        Stream<MmDmaCTR> mmDmaCtrStream = statisticsService.getMmDmaCTR();
+    public enum Interval {
+        DAY("day"),
+        MINUTE("minute"),
+        HOUR("hour");
 
-        List<MmDmaCTR> mmDmaCtrList = mmDmaCtrStream.toList();
+        private final String value;
 
-        List<Float> ctrValues = mmDmaCtrList.stream()
-                .map(MmDmaCTR::getCtr)
-                .toList();
+        Interval(String value) {
+            this.value = value;
+        }
 
-        List<Integer> mmDmaValues = IntStream.rangeClosed(0, 107)
-                .boxed()
-                .toList();
-
-        model.addAttribute("mmDma", mmDmaValues);
-        model.addAttribute("ctr", ctrValues);
-
-        return "barChart";
+        public String getValue() {
+            return value;
+        }
     }
 }
