@@ -35,9 +35,8 @@ public class StatisticsController {
     }
 
     @Operation(summary = "Upload view data from CSV")
-    @RequestMapping(
+    @PostMapping(
             path = "views",
-            method = RequestMethod.POST,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "text/plain")
     public ResponseEntity<String> uploadViewsFromFile(@RequestPart(value = "file") MultipartFile multipartFile) throws CsvValidationException, IOException {
@@ -46,9 +45,8 @@ public class StatisticsController {
     }
 
     @Operation(summary = "Upload action data from CSV")
-    @RequestMapping(
+    @PostMapping(
             path = "actions",
-            method = RequestMethod.POST,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "text/plain")
     public ResponseEntity<String> uploadActionsFromFile(@RequestPart(value = "file") MultipartFile multipartFile) throws CsvValidationException, IOException {
