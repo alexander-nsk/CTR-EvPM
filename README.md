@@ -26,7 +26,7 @@ The CTR & EvPM Analysis & Visualization application provides endpoints to upload
 
 **Description:** Retrieves CTR data and renders a bar chart for visualization. To view the chart, copy the link to your browser.
 ```html
-http://localhost:8080/ctrChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-25T20%3A00%3A00&interval=HOUR&tag=registration
+http://51.20.133.145:8080/ctrChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-22T20%3A00%3A00&interval=HOUR
 ```
 
 ### 5. Get EvPM within Date Range and Tag
@@ -39,7 +39,7 @@ http://localhost:8080/ctrChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-2
 
 **Description:** Retrieves EvPM data and renders a bar chart for visualization. To view the chart, copy the link to your browser.
 ```html
-http://localhost:8080/evpmChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-25T20%3A00%3A00&interval=DAY&tag=registration
+http://51.20.133.145:8080/evpmChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-25T20%3A00%3A00&interval=DAY&tag=registration
 ```
 ### 7. Aggregate Views Count by mmDma
 **Endpoint:** `GET /viewsCountByMmDma`
@@ -61,7 +61,7 @@ http://localhost:8080/evpmChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-
 
 **Description:** Retrieves CTR aggregate data by mmDma and renders a bar chart for visualization. To view the chart, copy the link to your browser.
 ```html
-http://localhost:8080/ctrByMmDmaChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-25T20%3A00%3A00&interval=DAY&tag=registration
+http://51.20.133.145:8080/ctrByMmDmaChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-25T20%3A00%3A00&interval=DAY&tag=registration
 ```
 
 ### 11. Get Ctr Aggregate By SiteId within Date Range and Tag
@@ -74,7 +74,7 @@ http://localhost:8080/ctrByMmDmaChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=20
 
 **Description:** Retrieves CTR aggregate data by siteId and renders a bar chart for visualization. To view the chart, copy the link to your browser.
 ```html
-http://localhost:8080/ctrBySiteIdChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-22T21%3A00%3A00&tag=registration
+http://51.20.133.145:8080/ctrBySiteIdChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-22T21%3A00%3A00&tag=registration
 ```
 
 ## Request Parameters
@@ -94,4 +94,9 @@ Data streams are provided in the response body as a JSON array.
 ### Charts
 Charts are rendered in the "barChart" view and include a graph title, Y-axis title, and data for both X and Y axes.
 
-**Note:** For chart endpoints, view the charts by copying the link to your browser.
+**Note:** 
+For data endpoints, use Swagger: 
+```html
+http://51.20.133.145:8080/
+```
+For chart endpoints, view the charts by copying the link to your browser.
