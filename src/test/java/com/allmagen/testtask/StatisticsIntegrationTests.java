@@ -1,5 +1,6 @@
 package com.allmagen.testtask;
 
+import com.allmagen.testtask.controller.StatisticsController;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,11 +23,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-
-public class StatisticsIntegrationTests {
+class StatisticsIntegrationTests {
     private final static String INTERVIEW_X = "classpath:testdata/interview.x.small.csv";
     private final static String INTERVIEW_Y = "classpath:testdata/interview.y.csv";
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private final LocalDateTime dateFrom = LocalDateTime.parse("2021-07-20T20:00:00", formatter);
+    private final LocalDateTime dateTo = LocalDateTime.parse("2021-07-20T23:00:00", formatter);
 
     @Autowired
     private MockMvc mockMvc;
@@ -108,8 +111,14 @@ public class StatisticsIntegrationTests {
     }
 
     @Test
-    void testGetMmDmaCTR() throws Exception {
-        String responseJson = mockMvc.perform(get("/views/ctrByMmDma")
+    void testGetCTR() throws Exception {
+        LocalDateTime dateFrom = LocalDateTime.parse("2021-07-20T20:00:00", formatter);
+        LocalDateTime dateTo = LocalDateTime.parse("2021-07-20T23:00:00", formatter);
+
+        String responseJson = mockMvc.perform(get("/ctr")
+                        .param("dateFrom", dateFrom.toString())
+                        .param("dateTo", dateTo.toString())
+                        .param("interval", StatisticsController.Interval.HOUR.getValue().toUpperCase())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -120,10 +129,13 @@ public class StatisticsIntegrationTests {
         assertThat(responseNode.isArray()).isTrue();
     }
 
-
     @Test
-    void testGetSiteIdCTR() throws Exception {
-        String responseJson = mockMvc.perform(get("/views/ctrBySiteId")
+    void testGetCTRWithTag() throws Exception {
+        String responseJson = mockMvc.perform(get("/ctr")
+                        .param("dateFrom", dateFrom.toString())
+                        .param("dateTo", dateTo.toString())
+                        .param("interval", StatisticsController.Interval.HOUR.getValue().toUpperCase())
+                        .param("tag", "registration")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -132,6 +144,94 @@ public class StatisticsIntegrationTests {
         JsonNode responseNode = objectMapper.readTree(responseJson).get("items");
 
         assertThat(responseNode.isArray()).isTrue();
+    }
+
+    @Test
+    void testEvPm() throws Exception {
+        String responseJson = mockMvc.perform(get("/evpm")
+                        .param("dateFrom", dateFrom.toString())
+                        .param("dateTo", dateTo.toString())
+                        .param("interval", StatisticsController.Interval.HOUR.getValue().toUpperCase())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode responseNode = objectMapper.readTree(responseJson).get("items");
+
+        assertThat(responseNode.isArray()).isTrue();
+    }
+
+    @Test
+    void testViewsCountByMmDma() throws Exception {
+        String responseJson = mockMvc.perform(get("/viewsCountByMmDma")
+                        .param("dateFrom", dateFrom.toLocalDate().toString())
+                        .param("dateTo", dateTo.toLocalDate().toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode responseNode = objectMapper.readTree(responseJson).get("items");
+
+        assertThat(responseNode.isArray()).isTrue();
+    }
+
+    @Test
+    void testViewsCountBySiteId() throws Exception {
+        String responseJson = mockMvc.perform(get("/viewsCountBySiteId")
+                        .param("dateFrom", dateFrom.toLocalDate().toString())
+                        .param("dateTo", dateTo.toLocalDate().toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode responseNode = objectMapper.readTree(responseJson).get("items");
+
+        assertThat(responseNode.isArray()).isTrue();
+    }
+
+    @Test
+    void testCtrByMmDma() throws Exception {
+        String responseJson = mockMvc.perform(get("/ctrByMmDma")
+                        .param("dateFrom", dateFrom.toString())
+                        .param("dateTo", dateTo.toString())
+                        .param("tag", "registration")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode responseNode = objectMapper.readTree(responseJson).get("items");
+
+        assertThat(responseNode.isArray()).isTrue();
+    }
+
+    @Test
+    void testCtrBySiteId() throws Exception {
+        String responseJson = mockMvc.perform(get("/ctrBySiteId")
+                        .param("dateFrom", dateFrom.toString())
+                        .param("dateTo", dateTo.toString())
+                        .param("tag", "registration")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode responseNode = objectMapper.readTree(responseJson).get("items");
+
+        assertThat(responseNode.isArray()).isTrue();
+    }
+
+    @Test
+    void tetCtrAggregateBySiteIdChart() throws Exception {
+        mockMvc.perform(get("/ctrBySiteIdChart")
+                        .param("dateFrom", dateFrom.toString())
+                        .param("dateTo", dateTo.toString())
+                        .param("tag", "registration")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
 }

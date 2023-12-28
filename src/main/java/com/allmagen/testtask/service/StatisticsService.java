@@ -3,10 +3,7 @@ package com.allmagen.testtask.service;
 import com.allmagen.testtask.controller.StatisticsController;
 import com.allmagen.testtask.model.ActionEntity;
 import com.allmagen.testtask.model.ViewEntity;
-import com.allmagen.testtask.model.metrics.MmDmaCTR;
-import com.allmagen.testtask.model.metrics.MmDmaCTRByDates;
-import com.allmagen.testtask.model.metrics.MmDmaCount;
-import com.allmagen.testtask.model.metrics.SiteIdCount;
+import com.allmagen.testtask.model.metrics.*;
 import com.allmagen.testtask.repository.ActionRepository;
 import com.allmagen.testtask.repository.ViewRepository;
 import com.opencsv.CSVReader;
@@ -201,14 +198,13 @@ public class StatisticsService {
         }
     }
 
-
     @Transactional
-    public Stream<MmDmaCTRByDates> getCTR(LocalDateTime startDate, LocalDateTime endDate, StatisticsController.Interval interval, String tag) {
+    public Stream<CtrDates> getCTR(LocalDateTime startDate, LocalDateTime endDate, StatisticsController.Interval interval, String tag) {
         return viewRepository.getCTR(startDate, endDate, interval.getValue(), tag);
     }
 
     @Transactional
-    public Stream<MmDmaCTRByDates> getEvPM(LocalDateTime startDate, LocalDateTime endDate, StatisticsController.Interval interval, String tag) {
+    public Stream<CtrDates> getEvPM(LocalDateTime startDate, LocalDateTime endDate, StatisticsController.Interval interval, String tag) {
         return viewRepository.getEvPM(startDate, endDate, interval.getValue(), tag);
     }
 
@@ -228,7 +224,7 @@ public class StatisticsService {
     }
 
     @Transactional
-    public Stream<MmDmaCTR> getCtrAggregateBySiteId(LocalDateTime startDate, LocalDateTime endDate, String tag) {
+    public Stream<SiteIdCTR> getCtrAggregateBySiteId(LocalDateTime startDate, LocalDateTime endDate, String tag) {
         return viewRepository.getCtrAggregateBySiteId(startDate, endDate, tag);
     }
 

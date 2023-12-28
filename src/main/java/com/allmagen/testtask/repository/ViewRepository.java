@@ -1,10 +1,7 @@
 package com.allmagen.testtask.repository;
 
 import com.allmagen.testtask.model.ViewEntity;
-import com.allmagen.testtask.model.metrics.MmDmaCTR;
-import com.allmagen.testtask.model.metrics.MmDmaCTRByDates;
-import com.allmagen.testtask.model.metrics.MmDmaCount;
-import com.allmagen.testtask.model.metrics.SiteIdCount;
+import com.allmagen.testtask.model.metrics.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -26,7 +23,7 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
             "WHERE (v.regTime BETWEEN :startDate AND :endDate)" +
             "GROUP BY intervalStart " +
             "ORDER BY intervalStart")
-    Stream<MmDmaCTRByDates> getCTR(LocalDateTime startDate, LocalDateTime endDate, String interval, String tag);
+    Stream<CtrDates> getCTR(LocalDateTime startDate, LocalDateTime endDate, String interval, String tag);
 
     @Query("SELECT FUNCTION('DATE_TRUNC', :interval, v.regTime) AS intervalStart, " +
             "SUM(COALESCE(a.count, 0)) * 1.0 / COUNT(DISTINCT v.uid) AS ctr " +
@@ -35,7 +32,7 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
             "WHERE (v.regTime BETWEEN :startDate AND :endDate)" +
             "GROUP BY intervalStart " +
             "ORDER BY intervalStart")
-    Stream<MmDmaCTRByDates> getEvPM(LocalDateTime startDate, LocalDateTime endDate, String interval, String tag);
+    Stream<CtrDates> getEvPM(LocalDateTime startDate, LocalDateTime endDate, String interval, String tag);
 
 
     @Query("SELECT v.mmDma AS mmDma, COUNT(v) AS count " +
@@ -66,7 +63,7 @@ public interface ViewRepository extends JpaRepository<ViewEntity, String> {
             "WHERE (v.regTime BETWEEN :startDate AND :endDate)" +
             "GROUP BY siteId " +
             "ORDER BY siteId")
-    Stream<MmDmaCTR> getCtrAggregateBySiteId(LocalDateTime startDate, LocalDateTime endDate, String tag);
+    Stream<SiteIdCTR> getCtrAggregateBySiteId(LocalDateTime startDate, LocalDateTime endDate, String tag);
 
 
 }
