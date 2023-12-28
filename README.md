@@ -1,94 +1,97 @@
-# CTR-EvPM
-CTR &amp; EvPM Analysis &amp; Visualisation
+# CTR & EvPM Analysis & Visualization App Documentation
 
-This document provides an information about the API for the interaction between views and actions.
+## Overview
+
+The CTR & EvPM Analysis & Visualization application provides endpoints to upload CSV data for views and actions, retrieve CTR (Click-Through Rate), EvPM (Events Per Minute) data within a specified date range and tag, and aggregate views data by mmDma or siteId. Additionally, it offers chart endpoints to visually represent the data.
+
+## Endpoints
 
 ### 1. Upload Views from CSV
+**Endpoint:** `POST /views`
 
-- **Endpoint:** `POST /views`
-- **Summary:** This endpoint allows you to upload view data from a CSV file. The response includes the number of views successfully uploaded.
+**Description:** Uploads view data from a CSV file. Accessible via Swagger.
 
 ### 2. Upload Actions from CSV
+**Endpoint:** `POST /actions`
 
-- **Endpoint:** `POST /actions`
-- **Summary:** Use this endpoint to upload action data from a CSV file. The response provides the number of actions successfully uploaded.
+**Description:** Uploads action data from a CSV file. Accessible via Swagger.
 
-### 3. Calculate Number of Views for given mmDma and Dates
+### 3. Get CTR within Date Range and Tag
+**Endpoint:** `GET /ctr`
 
-- **Endpoint:** `GET /views/allByMmDma`
-- **Summary:** This endpoint calculates the number of views for a specified mmDma within a given date range.
+**Description:** Retrieves CTR data within a specified date range and tag. Accessible via Swagger.
 
-### 4. Calculate Number of Views for given siteId and Dates
+### 4. Get CTR Chart
+**Endpoint:** `GET /ctrChart`
 
-- **Endpoint:** `GET /views/allBySiteId`
-- **Summary:** Calculate the number of views for a specified siteId within a given date range using this endpoint.
-
-### 5. CTR for MmDma
-
-- **Endpoint:** `GET /views/ctrByMmDma`
-- **Summary:** Retrieve click-through rates (CTR) for MmDma with this endpoint.
-
-### 6. CTR for MmDma with Tag
-
-- **Endpoint:** `GET /views/ctrByMmDmaByTag`
-- **Summary:** This endpoint retrieves CTR for MmDma with a specific tag.
-
-### 7. CTR for SiteId
-
-- **Endpoint:** `GET /views/ctrBySiteId`
-- **Summary:** Obtain click-through rates (CTR) for SiteId using this endpoint.
-
-### 8. CTR for SiteId with Tag
-
-- **Endpoint:** `GET /views/ctrBySiteIdByTag`
-- **Summary:** Retrieve CTR for SiteId with a specific tag through this endpoint.
-
-# API Usage Examples
-
-## Swagger example
-
-1. **Launch the Application:**
-    - Ensure that the application is up and running.
-    - Navigate to [http://localhost:8080/](http://localhost:8080/) in your web browser.
-
-2. **Explore the API with Swagger:**
-    - Visit [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) for an interactive Swagger UI experience.
-    - Browse available controller methods
-
-3**Upload Views and Actions Files:**
-    - Utilize the appropriate POST requests to upload view and actions files.
-    - Refer to the specific API documentation for details on file uploads.
-
-4**Test Endpoints:**
-    - Click on specific endpoints to view details.
-    - Use the "Try it out" button to test endpoints directly within Swagger UI.
-    - Provide required parameters and execute requests to see real-time responses.
-
-
-
-**Example Requests:**
-- Upload Views File:
-![img.png](img.png)
-
-# Get Click-Through Rate (CTR) for MmDma within Date Range and Tag
-
-## Description
-This endpoint retrieves the Click-Through Rate (CTR) for a specified MmDma within a given date range.
-
-## Endpoint
-`GET /views/ctr-by-dates`
-
-## Request Parameters
-- **dateFrom** (required): The starting date and time of the date range. Format: 'yyyy-MM-ddTHH:mm:ss'
-- **dateTo** (required): The ending date and time of the date range. Format: 'yyyy-MM-ddTHH:mm:ss'
-
-## Responses
-- **200 OK**
-    - Description: Array of MmDma and CTR pairs with a specific tag.
-
-## Example
-```http
-GET /views/ctr-by-dates?dateFrom=2021-07-20T20:00:00&dateTo=2021-07-30T23:59:59
+**Description:** Retrieves CTR data and renders a bar chart for visualization. To view the chart, copy the link to your browser.
+```html
+http://localhost:8080/ctrChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-25T20%3A00%3A00&interval=HOUR&tag=registration
 ```
 
-![img_1.png](img_1.png)
+### 5. Get EvPM within Date Range and Tag
+**Endpoint:** `GET /evpm`
+
+**Description:** Retrieves EvPM data within a specified date range and tag. Accessible via Swagger.
+
+### 6. Get EvPM Chart
+**Endpoint:** `GET /evpmChart`
+
+**Description:** Retrieves EvPM data and renders a bar chart for visualization. To view the chart, copy the link to your browser.
+```html
+http://localhost:8080/evpmChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-25T20%3A00%3A00&interval=DAY&tag=registration
+```
+### 7. Aggregate Views Count by mmDma
+**Endpoint:** `GET /viewsCountByMmDma`
+
+**Description:** Aggregates the number of views by mmDma within a specified date range. Accessible via Swagger.
+
+### 8. Aggregate Views Count by SiteId
+**Endpoint:** `GET /viewsCountBySiteId`
+
+**Description:** Aggregates the number of views by siteId within a specified date range. Accessible via Swagger.
+
+### 9. Get Ctr Aggregate By mmDma within Date Range and Tag
+**Endpoint:** `GET /ctrByMmDma`
+
+**Description:** Retrieves CTR aggregate data by mmDma within a specified date range and tag. Accessible via Swagger.
+
+### 10. Get Ctr Aggregate By mmDma Chart
+**Endpoint:** `GET /ctrByMmDmaChart`
+
+**Description:** Retrieves CTR aggregate data by mmDma and renders a bar chart for visualization. To view the chart, copy the link to your browser.
+```html
+http://localhost:8080/ctrByMmDmaChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-25T20%3A00%3A00&interval=DAY&tag=registration
+```
+
+### 11. Get Ctr Aggregate By SiteId within Date Range and Tag
+**Endpoint:** `GET /ctrBySiteId`
+
+**Description:** Retrieves CTR aggregate data by siteId within a specified date range and tag. Accessible via Swagger.
+
+### 12. Get Ctr Aggregate By SiteId Chart
+**Endpoint:** `GET /ctrBySiteIdChart`
+
+**Description:** Retrieves CTR aggregate data by siteId and renders a bar chart for visualization. To view the chart, copy the link to your browser.
+```html
+http://localhost:8080/ctrBySiteIdChart?dateFrom=2021-07-20T20%3A00%3A00&dateTo=2021-07-22T21%3A00%3A00&tag=registration
+```
+
+## Request Parameters
+
+- `dateFrom` (required): Start date for data retrieval (e.g., 2021-07-20T20:00:00).
+- `dateTo` (required): End date for data retrieval (e.g., 2021-07-22T20:00:00).
+- `interval` (required): Time interval for data aggregation.
+- `tag` (optional): Tag for filtering data.
+
+## Response
+
+The responses include data streams and charts, depending on the endpoint.
+
+### Data Streams
+Data streams are provided in the response body as a JSON array.
+
+### Charts
+Charts are rendered in the "barChart" view and include a graph title, Y-axis title, and data for both X and Y axes.
+
+**Note:** For chart endpoints, view the charts by copying the link to your browser.
