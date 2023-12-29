@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 public interface ViewRepository extends JpaRepository<ViewEntity, String> {
 
     @Query("SELECT FUNCTION('DATE_TRUNC', :interval, v.regTime) AS intervalStart, " +
-            "SUM(COALESCE(a.count, 0)) * 1.0 / COUNT(DISTINCT v.uid) AS ctr " +
+            "SUM(COALESCE(a.count, 0)) * 100.0 / COUNT(DISTINCT v.uid) AS ctr " +
             "FROM ViewEntity v " +
             "FULL JOIN ActionEntity a ON (v.uid = a.viewEntity.uid AND ((:tag is null AND (a.tag = 'fclick' OR NOT (a.tag LIKE 'v%'))) or a.tag = :tag))" +
             "WHERE (v.regTime BETWEEN :startDate AND :endDate)" +

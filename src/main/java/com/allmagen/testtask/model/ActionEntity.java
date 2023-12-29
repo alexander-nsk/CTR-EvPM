@@ -63,8 +63,8 @@ public class ActionEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ActionEntity that = (ActionEntity) o;
-        return count == that.count && Objects.equals(id, that.id) && Objects.equals(viewEntity, that.viewEntity) && Objects.equals(tag, that.tag);
+        ActionEntity action = (ActionEntity) o;
+        return count == action.count && Objects.equals(id, action.id) && Objects.equals(viewEntity, action.viewEntity) && Objects.equals(tag, action.tag);
     }
 
     @Override

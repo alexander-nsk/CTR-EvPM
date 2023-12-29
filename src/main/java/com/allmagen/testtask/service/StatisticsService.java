@@ -174,7 +174,8 @@ public class StatisticsService {
 
                 ActionEntity action = new ActionEntity(viewEntity, csvLine[ActionColumn.TAG.value]);
                 if (actionsMap.containsKey(action)) {
-                    actionsMap.put(action, actionsMap.get(action) + 1);
+                    int count = actionsMap.get(action) + 1;
+                    actionsMap.put(action, count);
                 } else {
                     actionsMap.put(action, 1);
                 }
